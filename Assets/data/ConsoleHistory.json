@@ -1,0 +1,40 @@
+{
+    "Hello": {
+        "type": "actionText",
+        "action": {
+            "url": "https://github.com/Xwared-Team/Engine-on-CSharp"
+        }
+    },
+
+    "Cant load font %file%": {
+        "type": ["engineDebug", "actionText"],
+        "engineDebugClass": "error",
+        "action": {
+            "showFolder": "./Assets/Font/"
+        },
+        "info": {
+            "fileError": "FontAtlas.cs",
+            "line": 34,
+            "date": "14:50 02.05.2026"
+        }
+    },
+
+    "canf3 true": {
+        "type": "command",
+        "executed": true,
+        "info": {
+            "date": "01:58 10.07.2026",
+            "executor": "Dov1ntc#1"
+        }
+    },
+
+    "server player kick targetid Pogyto#2 reasoncode 17 banduration 1h": {
+        "type": "command",
+        "executed": false,
+        "info": {
+            "date":"02:02 10.07.2026",
+            "executor": "Dov1ntc#1",
+            "error": "dont have permission to use this command"
+        }
+    }
+}

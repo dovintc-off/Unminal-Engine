@@ -1,6 +1,0 @@
-[ActionText,action=url,url="https://github.com/Xwared-Team/Engine-on-CSharp"]Hello
-[EngineInfo,ClassInfo=error,MoreInfo={file=FontAtlas,line=34,time="14:50",date="02.05.2026"}]Cant load font 0file0[0=[ActionText,action=ShowFolder,FolderPath="./Assets/Font/"]]
-[Command,completed]GetMetaInfo teapot1[answer]position = Vector3(-20, 0, -50),Scale = Vector3(0.5f),Color = Vector3(0.8f, 0.2f, 0.2f)
-[Command,cant-completed,error='Object does not have a "hide" property']Hide teapot1[answer=error]
-[Command,cant-completed,error=$'Comand "{command}" nmot found']GetMtaInfo teapot2[answer=error]
-[Log,LogType=Error,MoreInfo={file="67.cs",line="67"}]"Error with load"

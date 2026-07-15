@@ -1,10 +1,10 @@
 // TextRender/FontAtlas.cs
-namespace Unminal.UI.TextRender;
+namespace Unminal.UI.TextRender.FontAtlas;
 
 using System.Collections.Concurrent;
 
 [SupportedOSPlatform("windows")]
-public class FontAtlas : IDisposable
+public class Atlas : IDisposable
 {   
     public int TextureID {get; private set;}
     public int Width {get; private set;}
@@ -14,7 +14,7 @@ public class FontAtlas : IDisposable
 
     private const string Charset = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .,!?-+*/|\=()[]{}<>@#$%^АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя";
 
-    public FontAtlas(string fontPath, int fontSize, int atlasSize = 512)
+    public Atlas(string fontPath, int fontSize, int atlasSize = 512)
     {
         Width = atlasSize;
         Height = atlasSize;

@@ -1,8 +1,8 @@
 // render/ShaderProgram.cs
-namespace Unminal.Render;
+namespace Unminal.Render.ShaderProgram;
 
 [SupportedOSPlatform("windows")]
-public class ShaderProgram: IDisposable
+public class Shader: IDisposable
 {
     int _handle;
 
@@ -13,7 +13,7 @@ public class ShaderProgram: IDisposable
 
     Dictionary<string, int> _uniformLocations;
 
-    public ShaderProgram(string vertPath, string fragPath)
+    public Shader(string vertPath, string fragPath)
     {
         if (!File.Exists(vertPath) || !File.Exists(fragPath)){
             Console.WriteLine("[ShaderProgram.cs:19]: Error: Vertex and fragment shader file not exist (shaderProgramm.cs:18)"); 

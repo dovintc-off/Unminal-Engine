@@ -1,6 +1,6 @@
 using Unminal.Main;
 
-namespace Unminal.Base;
+namespace Unminal.Script.Core;
 
 [SupportedOSPlatform("windows")]
 public abstract class BaseGame

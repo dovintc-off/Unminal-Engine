@@ -10,9 +10,9 @@ public class Main : GameWindow
     bool _GamePaused = false;
     bool _GameFullscreen = false;
     float _initialFov = MathHelper.PiOver4;
-    private TextRenderer? _textRenderer;
+    private Text? _textRenderer;
     private Camera? _activeCameraRef; 
-    private GameConsole.GameConsole? gameConsole;
+    private GameConsole? gameConsole;
 
     public Main(BaseGame userGame) 
         : base(
@@ -35,13 +35,14 @@ public class Main : GameWindow
             })
     {
         _userGame = userGame;
+        this.TextInput += HandleConsoleTextInput;
     }
 
     protected override void OnLoad()
     {
         base.OnLoad(); 
 
-        gameConsole = new GameConsole.GameConsole();
+        gameConsole = new GameConsole();
 
         bool vsync = Config.Get<bool>("VSync", false);
         this.VSync = vsync ? VSyncMode.On : VSyncMode.Off;
@@ -53,7 +54,7 @@ public class Main : GameWindow
         GL.Enable(EnableCap.Blend); 
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
-        _textRenderer = new TextRenderer(
+        _textRenderer = new Text(
             "./Assets/fonts/VCR-OSD-MONO.ttf",
             32,
             "./Assets/shaders/text/shader.vert",
@@ -91,13 +92,16 @@ public class Main : GameWindow
         }
     }
 
-    protected override void OnUpdateFrame(FrameEventArgs e)
-    {
+    protected override void OnUpdateFrame(FrameEventArgs e) {
         base.OnUpdateFrame(e);
 
         KeyboardState input = KeyboardState;
         MouseState mouse = MouseState;
         
+        EngineValues.IsPaused = _GamePaused;
+        if (gameConsole != null) EngineValues.IsConsoleOpen = gameConsole.IsOpen;
+        EngineValues.IsDebugOpen = debug_menu;
+
         // Full Screen enable/disable
         if (input.IsKeyReleased(Keys.F11))
         {
@@ -143,16 +147,32 @@ public class Main : GameWindow
         SetTitle();
     }
 
-    protected override void OnRenderFrame(FrameEventArgs e)
-    {   
+    private void HandleConsoleTextInput(TextInputEventArgs e)
+    {
+        if (gameConsole != null && gameConsole.IsOpen)
+        {
+            string text = e.AsString; 
+            
+            if (!string.IsNullOrEmpty(text) && text[0] >= 32)
+            {
+                gameConsole.AppendToCommand(text);
+            }
+        }
+    }
+
+    protected override void OnRenderFrame(FrameEventArgs e) {   
         base.OnRenderFrame(e);
+
+        EngineValues.DeltaTime = (float)e.Time;
+        EngineValues.TotalTime += e.Time;
+        EngineValues.CurrentKeyboard = KeyboardState;
+        EngineValues.CurrentMouse = MouseState;
 
         GL.ClearColor(0, 0, 0, 1);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         _userGame.Draw(_projection);
 
-        if (gameConsole != null && gameConsole.IsOpen)
-        {
+        if (gameConsole != null && gameConsole.IsOpen) {
             gameConsole.DrawConsole(Size.X, Size.Y);
         } 
 
@@ -162,20 +182,20 @@ public class Main : GameWindow
             float TS = 0.5f;
             Matrix4 ortho = Matrix4.CreateOrthographicOffCenter(0, Size.X, Size.Y, 0, -1, 1);
             
-            _textRenderer.DrawString($"Unminal V0.2.1 {gameConsole?.IsOpen}", 10, 7, TS, ortho, Colors.White, 2f);
-            _textRenderer.DrawString($"FPS: {1.0 / e.Time:F1}", 10, 63, TS, ortho, Colors.White, 1f); 
+            _textRenderer.DrawString($"Unminal V0.2.1 {gameConsole?.IsOpen}", 10, 7, TS, ortho, new Vector4(Colors.White, 1f), 2f);
+            _textRenderer.DrawString($"FPS: {1.0 / e.Time:F1}", 10, 63, TS, ortho, new Vector4(Colors.White, 1f), 1f); 
             
             string posText = string.Format(CultureInfo.InvariantCulture, 
                 "Pos: {0:F1} {1:F1} {2:F1} | FOV: {3}", 
 
                 _activeCameraRef.Position.X, _activeCameraRef.Position.Y, _activeCameraRef.Position.Z, 
                 MathHelper.RadiansToDegrees(_activeCameraRef!.FOV));
-            _textRenderer.DrawString(posText, 10, 91, TS, ortho, Colors.White, 1f);
+            _textRenderer.DrawString(posText, 10, 91, TS, ortho, new Vector4(Colors.White, 1f), 1f);
 
             string dirText = string.Format(CultureInfo.InvariantCulture, 
                 "Dir: {0:F1} {1:F1} {2:F1}", 
                 _activeCameraRef.Front.X, _activeCameraRef.Front.Y, _activeCameraRef.Front.Z);
-            _textRenderer.DrawString(dirText, 10, 119, TS, ortho, Colors.White, 1f); 
+            _textRenderer.DrawString(dirText, 10, 119, TS, ortho, new Vector4(Colors.White, 1f), 1f); 
 
         }
         Context.SwapBuffers();
@@ -185,7 +205,7 @@ public class Main : GameWindow
     {
         base.OnResize(e);
         GL.Viewport(0, 0, e.Width, e.Height);
-        
+        EngineValues.WindowSize = new Vector2i(Size.X, Size.Y);
         float currentFov = _activeCameraRef?.FOV ?? _initialFov;
         _projection = Matrix4.CreatePerspectiveFieldOfView(currentFov, Size.X / (float)Size.Y, 0.1f, 1000.0f);
 

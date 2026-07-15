@@ -1,18 +1,13 @@
 // TextRender/TextRenderer.cs
-namespace Unminal.UI.TextRender;
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Versioning;
+namespace Unminal.UI.TextRender.TextRenderer;
 
 /// <summary>
 /// Renders text using dynamic vertex buffers and a pre-generated font texture atlas in OpenGL.
 /// </summary>
 [SupportedOSPlatform("windows")]
-public class TextRenderer : IDisposable
+public class Text : IDisposable
 {
-    private readonly FontAtlas _fontAtlas;
+    private readonly Atlas _fontAtlas;
 
     private readonly int _vao;
     private readonly int _vbo;
@@ -30,9 +25,9 @@ public class TextRenderer : IDisposable
     /// <param name="fontSize">The point size of the font to generate in the atlas.</param>
     /// <param name="shaderVertex">The file path to the vertex shader source code.</param>
     /// <param name="shaderFragment">The file path to the fragment shader source code.</param>
-    public TextRenderer(string fontPath, int fontSize, string shaderVertex, string shaderFragment)
+    public Text(string fontPath, int fontSize, string shaderVertex, string shaderFragment)
     {
-        _fontAtlas = new FontAtlas(fontPath, fontSize);
+        _fontAtlas = new Atlas(fontPath, fontSize);
 
         _vao = GL.GenVertexArray();
         GL.BindVertexArray(_vao);
@@ -164,7 +159,7 @@ public class TextRenderer : IDisposable
     /// <param name="projection">The orthographic or perspective matrix mapping text coordinates to the screen layout.</param>
     /// <param name="color">The color vector applied to shade the text glyphs.</param>
     /// <param name="spacing">The pixel gap multiplier applied uniformly between individual characters. Default is 1.0f.</param>
-    public void DrawString(string text, float x, float y, float scale, Matrix4 projection, Vector3 color, float spacing = 1.0f)
+    public void DrawString(string text, float x, float y, float scale, Matrix4 projection, Vector4 color, float spacing = 1.0f)
     {
         if (string.IsNullOrEmpty(text)) return;
 
@@ -192,7 +187,7 @@ public class TextRenderer : IDisposable
         GL.UseProgram(_shaderProgram);
         GL.UniformMatrix4(_locProjection, false, ref projection);
         
-        GL.Uniform3(_locColor, color);
+        GL.Uniform4(_locColor, color);
 
         GL.ActiveTexture(TextureUnit.Texture0);
         GL.BindTexture(TextureTarget.Texture2D, _fontAtlas.TextureID);
@@ -211,6 +206,22 @@ public class TextRenderer : IDisposable
         GL.Enable(EnableCap.DepthTest); 
 
         GL.Disable(EnableCap.Blend);
+    }
+
+    public float MeasureWidth(string text, float scale, float spacing = 1.0f)
+    {
+        if (string.IsNullOrEmpty(text)) return 0f;
+
+        float width = 0f;
+        foreach (char c in text)
+        {
+            if (_fontAtlas.TryGetGlyph(c, out var glyph))
+            {
+                width += (glyph.Advance + spacing) * scale;
+            }
+        }
+        
+        return width;
     }
 
     /// <summary>

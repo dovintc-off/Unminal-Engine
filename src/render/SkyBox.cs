@@ -1,4 +1,4 @@
-namespace Unminal.SkyBox;
+namespace Unminal.Render.SkyBox;
 
 [SupportedOSPlatform("windows")]
 public class Skybox : IDisposable

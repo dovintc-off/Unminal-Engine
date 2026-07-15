@@ -1,13 +1,12 @@
-namespace Unminal.Objects;
+namespace Unminal.Render.Objects;
 
 using OpenTK.Mathematics;
-using Unminal.Render;
 
 [SupportedOSPlatform("windows")]
 public class GameObject
 {
     public Mesh? Mesh { get; set; }
-    public ShaderProgram? Shader { get; set; }
+    public Shader? Shader { get; set; }
     
     public Vector3 Position { get; set; } = Vector3.Zero;
     public Vector3 Rotation { get; set; } = Vector3.Zero;
@@ -16,7 +15,7 @@ public class GameObject
     public Vector3 Color { get; set; } = Vector3.One;
     public Vector3 LightPos { get; set; } = new Vector3(0, 10, 0);
 
-    public GameObject(Mesh mesh, ShaderProgram shader)
+    public GameObject(Mesh mesh, Shader shader)
     {
         Mesh = mesh;
         Shader = shader;

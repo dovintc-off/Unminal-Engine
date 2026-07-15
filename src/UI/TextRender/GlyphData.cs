@@ -1,5 +1,5 @@
 // TextRender/GlyphData.cs
-namespace Unminal.UI.TextRender;
+namespace Unminal.UI.TextRender.Glyph;
 
 public struct GlyphData
 {

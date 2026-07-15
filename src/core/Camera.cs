@@ -1,8 +1,5 @@
 // camera.cs
-namespace Unminal.Core;
-
-using OpenTK.Mathematics;
-using OpenTK.Windowing.GraphicsLibraryFramework;
+namespace Unminal.Core.Camera;
 
 public class Camera
 {
