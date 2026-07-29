@@ -3,28 +3,26 @@ namespace Unminal.Core.Commands.CommandParser;
 using System.Text.Json.Nodes;
 
 [SupportedOSPlatform("windows")]
-public class ParserCommands {
-    public string Path { get; set; }
-    public List<Command> Commands { get; private set; } = new();
-    private JsonNode? _json;
-
-    public ParserCommands(string path) {
-        Path = path;
-        
-        if (File.Exists(Path)) {
+public static class ParserCommands {
+    public static JsonNode? InitParser(string path) {
+        if (File.Exists(path)) {
             try {
-                string jsonText = File.ReadAllText(Path);
-                _json = JsonNode.Parse(jsonText);
+                string jsonText = File.ReadAllText(path);
+                return JsonNode.Parse(jsonText);
             } catch (Exception ex) {
-                Console.WriteLine($"Ошибка чтения JSON: {ex.Message}");
+                Console.CreateLog(Console.LogType.ERROR, $"JSON write error: {ex.Message}");
+                throw new Exception();
             }
-        } else { Console.WriteLine($"Файл не найден: {Path}");}
+        } else { 
+            Console.CreateLog(Console.LogType.ERROR, $"File not found: {path}");
+            throw new Exception();
+        }
     }
 
-    public List<Command> Parse() {
+    public static List<Command> Parse(JsonNode? json, List<Command> Commands) {
         if (Commands.Count > 0) return Commands;
 
-        if (_json is JsonObject rootObject) {
+        if (json is JsonObject rootObject) {
             foreach (var property in rootObject) {
                 string rootKey = property.Key;
                 JsonNode? rootValue = property.Value;
