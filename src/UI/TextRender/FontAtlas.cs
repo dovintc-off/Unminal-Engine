@@ -12,9 +12,9 @@ public class Atlas : IDisposable
 
     private ConcurrentDictionary<char, GlyphData> _glyphs = new ConcurrentDictionary<char, GlyphData>();
 
-    private const string Charset = """ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .,!?-_+*/|\=()[]{}<>:;"'@#$%^""";
+    private const string Charset = Engine.LanguageChars.EN + Engine.LanguageChars.RU + """0123456789 .,!?-_+*/|\=()[]{}<>:;"'@#$%^""";
 
-    public Atlas(string fontPath, int fontSize, int atlasSize = 512)
+    public Atlas(string fontPath, int fontSize, int atlasSize = 2048)
     {
         Width = atlasSize;
         Height = atlasSize;
@@ -30,7 +30,9 @@ public class Atlas : IDisposable
         using var bitmap = new Bitmap(Width, Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
         using var graphics = Graphics.FromImage(bitmap);
 
-        graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+        // graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
+        graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+
         graphics.Clear(Color.Transparent);
 
         var format = StringFormat.GenericTypographic;
@@ -41,24 +43,26 @@ public class Atlas : IDisposable
         float maxHeightInRow = 0;
         float padding = 4.0f;
 
-        using var drawFont = new System.Drawing.Font(family, fontSize);
+        using var drawFont = new Font(family, fontSize);
 
-        foreach (char c in Charset)
-        {
+        foreach (char c in Charset) {
             string s = c.ToString();
             
             SizeF size = graphics.MeasureString(s, drawFont, PointF.Empty, format);
             
-            if (currentX + size.Width > Width)
+            float wPixels = MathF.Ceiling(size.Width);
+            float hPixels = MathF.Ceiling(size.Height);
+            
+            if (currentX + wPixels > Width)
             {
                 currentX = 2;
-                currentY += maxHeightInRow + padding;
+                currentY += MathF.Ceiling(maxHeightInRow) + padding;
                 maxHeightInRow = 0;
             }
             
-            if (currentY + size.Height > Height)
+            if (currentY + hPixels > Height)
             {
-                Console.Instance?.Log("Warning", $"Font atlas overflow! Symbol: '{c}'");
+                Console.CreateLog(Console.LogType.WARNING, $"Font atlas overflow! Symbol: '{c}'");
                 break;
             }
 
@@ -66,15 +70,15 @@ public class Atlas : IDisposable
 
             float u = currentX / Width;
             float v = currentY / Height;
-            float w = size.Width / Width;
-            float h = size.Height / Height;
+            float w = wPixels / Width;
+            float h = hPixels / Height;
             
-            float advance = size.Width; 
+            float advance = wPixels; 
 
             _glyphs.TryAdd(c, new GlyphData(c, u, v, w, h, 0, 0, advance));
 
-            currentX += size.Width + padding;
-            if (size.Height > maxHeightInRow) maxHeightInRow = size.Height;
+            currentX += wPixels + padding;
+            if (hPixels > maxHeightInRow) maxHeightInRow = hPixels;
         }
 
         string outputPath = "debug/generated_atlas.png";
@@ -84,7 +88,7 @@ public class Atlas : IDisposable
             Directory.CreateDirectory(dirName);
         }
         bitmap.Save(outputPath, ImageFormat.Png);
-        Console.Instance?.Log("Debug", $"Font atlas saved to: {outputPath}");
+        Console.CreateLog(Console.LogType.INFO, $"Font atlas saved to: {outputPath}");
 
         LoadTextureToOpenGL(bitmap);
     }

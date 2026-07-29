@@ -43,7 +43,7 @@ public class Main : GameWindow {
 
 
         _textRenderer = new Text(
-            GetPath.GetCorrectPath(Engine.Paths.Fonts.VCR_OSD_MONO),
+            GetPath.GetCorrectPath(Engine.Paths.Fonts.Arial),
             32,
             GetPath.GetCorrectPath(Engine.Paths.Shaders.textV),
             GetPath.GetCorrectPath(Engine.Paths.Shaders.textF)

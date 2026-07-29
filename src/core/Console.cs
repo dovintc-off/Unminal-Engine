@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 [SupportedOSPlatform("windows")]
 public class Console {
     public bool IsOpen {get; private set;} = false;
-    public List<string> History {get; private set;} = new List<string>();
+    public static List<string> History {get; private set;} = new List<string>();
     public static Console? Instance { get; private set; }
     private Text? _textRenderer;
     private RichTextSegment? _richTextRenderer;
@@ -31,7 +31,7 @@ public class Console {
         parserCommands = new ParserCommands(GetPath.GetCorrectPath(Engine.Paths.Config.CommandConfig));
         _richTextRenderer = new RichTextSegment(new Vector4(1, 1, 1, 1));
         _textRenderer = new Text(
-            GetPath.GetCorrectPath(Engine.Paths.Fonts.PFAgoraSlabPro_Bold),
+            GetPath.GetCorrectPath(Engine.Paths.Fonts.Arial),
             32,
             GetPath.GetCorrectPath(Engine.Paths.Shaders.textV),
             GetPath.GetCorrectPath(Engine.Paths.Shaders.textF)
@@ -71,14 +71,6 @@ public class Console {
     }
 
     public void AppendToCommand(string text) {InputedCommand += text;}
-
-    public void Log(string logType, string TextLog, 
-        [CallerFilePath] string file = "", 
-        [CallerLineNumber] int line = 0)
-    {
-        string fileName = System.IO.Path.GetFileName(file);
-        History.Add($"[Log,LogType={logType},fileError={fileName},lineError={line}]{TextLog}");
-    }
 
     private List<string> ReadHistory()
     {   
@@ -140,7 +132,10 @@ public class Console {
         };
 
         string calledFileName = Path.GetFileName(file);
-        Console.WriteLine($"{prefix}{textcolor}{LogText}{resetcolor}Called in {calledFileName}:{line}");
+        string FinalLogText = $"{prefix}{textcolor}{LogText}{resetcolor}Called in {calledFileName}:{line}";
+        Console.WriteLine(FinalLogText);
+        
+        History.Add(FinalLogText);
 
         if (CrashGame) {
             string message = string.IsNullOrWhiteSpace(CrashError) ? "Game Crashed!" : $"Game Crashed: {CrashError}";
@@ -168,12 +163,13 @@ public class Console {
 
         int index = 0;
         foreach (var line in History) {
-            _textRenderer?.DrawString(line, 10, (30 * index) + 2, 0.5f, new Vector4(Colors.White, 1f), 1f);
+            _richTextRenderer?.Draw(_textRenderer!, $"{line}", 10, 50 * index, 0.8f);
             index++;
         }
 
         _textRenderer?.DrawString(InputedCommand, 10, Engine.WindowSize.Y - 30, 0.5f, new Vector4(Colors.White, 1f), 1f);
-            GL.Enable(EnableCap.DepthTest);
+        GL.Enable(EnableCap.DepthTest);
+        
     }
 
 }

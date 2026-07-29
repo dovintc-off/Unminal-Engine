@@ -17,7 +17,7 @@ public class MyGame : BaseGame {
         Engine.LightManager?.AddLight(new LightData(new Vector3(0, 0, 0), Colors.White, 30f));
 
         _textRenderer = new Text(
-            GetPath.GetCorrectPath(Engine.Paths.Fonts.PFAgoraSlabPro_Bold),
+            GetPath.GetCorrectPath(Engine.Paths.Fonts.Arial),
             32,
             GetPath.GetCorrectPath(Engine.Paths.Shaders.textV),
             GetPath.GetCorrectPath(Engine.Paths.Shaders.textF)
@@ -48,8 +48,6 @@ public class MyGame : BaseGame {
         new Billboard()
             .Position(new Vector3(15, 8, -40)).Scale(new Vector2(8.0f, 5.0f))
             .Texture(Cat).Draw();
-        if (Scene.circle == null) return;
-        Scene.circle.Draw();
     }
 
     public override void Unload() {

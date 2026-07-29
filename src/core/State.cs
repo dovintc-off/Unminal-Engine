@@ -98,12 +98,19 @@ public static class Engine {
             private static readonly Dictionary<string, string> _ = new(){
                 ["Metroplex_Shadow"] = "./Assets/fonts/Metroplex-Shadow.ttf",
                 ["PFAgoraSlabPro_Bold"] = "./Assets/fonts/PFAgoraSlabPro-Bold.ttf",
-                ["VCR_OSD_MONO"] = "./Assets/fonts/VCR-OSD-MONO.ttf"
+                ["VCR_OSD_MONO"] = "./Assets/fonts/VCR-OSD-MONO.ttf",
+                ["Arial"] = "./Assets/fonts/Arial/arialmt.ttf"
             };
             public static string Metroplex_Shadow => _["Metroplex_Shadow"];
             public static string PFAgoraSlabPro_Bold => _["PFAgoraSlabPro_Bold"];
             public static string VCR_OSD_MONO => _["VCR_OSD_MONO"];
+            public static string Arial => _["Arial"];
         }
+    }
+    
+    public class LanguageChars {
+        public const string EN = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        public const string RU = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя";
     }
 }
 // yeah im soooo love word "maybe" 

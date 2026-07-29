@@ -5,7 +5,8 @@ debug/
 
 # My
 .env
-*.txt
+/.txt
+/tree.txt
 
 # VS Code specific
 .vscode/*
