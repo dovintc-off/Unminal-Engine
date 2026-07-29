@@ -13,7 +13,7 @@ public class Shader: IDisposable {
 
     public Shader(string vertPath, string fragPath) {
         if (!File.Exists(vertPath) || !File.Exists(fragPath)){
-            Console.WriteLine("[ShaderProgram.cs]: Error: Vertex or fragment shader file not found"); 
+            Console.CreateLog(Console.LogType.ERROR, "Vertex or fragment shader file not found", CrashGame: true, ""); 
             throw new FileNotFoundException();
         }
         readedVertexShader = File.ReadAllText(vertPath);

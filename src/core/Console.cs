@@ -12,7 +12,6 @@ public class Console {
     private bool _wasToggleKeyPressed = false;
     private readonly string _pathToFileHistory = GetPath.GetCorrectPath(Engine.Paths.Config.ConsoleHistory);
     private KeyboardState? _prevInput;
-    private ParserCommands parserCommands; 
     public enum LogType {
         ERROR, INFO, WARNING 
     }
@@ -28,7 +27,6 @@ public class Console {
         Instance = this;
         History = ReadHistory();
         IsOpen = isOpen;
-        parserCommands = new ParserCommands(GetPath.GetCorrectPath(Engine.Paths.Config.CommandConfig));
         _richTextRenderer = new RichTextSegment(new Vector4(1, 1, 1, 1));
         _textRenderer = new Text(
             GetPath.GetCorrectPath(Engine.Paths.Fonts.Arial),
@@ -63,7 +61,7 @@ public class Console {
 
         if (input.IsKeyReleased(Keys.Enter)) {
             if (string.IsNullOrWhiteSpace(InputedCommand)) return;
-            CommandExecutor.Execute(InputedCommand, parserCommands);
+            CommandExecutor.Execute(InputedCommand);
             WriteHistory(InputedCommand);
             InputedCommand = "";
             return;
@@ -77,12 +75,12 @@ public class Console {
 
         if (!File.Exists(_pathToFileHistory))
         {
-            Console.WriteLine("[Console] cant read history file");
+            Console.CreateLog(Console.LogType.WARNING, "Cant read history file");
             return new List<string>();
         } try {       
             return new List<string>(File.ReadAllLines(_pathToFileHistory));
         } catch (Exception e) {
-            Console.WriteLine($"[Console] cant read history file {e}");
+            Console.CreateLog(Console.LogType.WARNING, $"Cant read history file {e}");
             return new List<string>();
         }
     }
@@ -91,7 +89,7 @@ public class Console {
         try {
             File.AppendAllText(_pathToFileHistory, command + Environment.NewLine);
         } catch (Exception e) {
-            Console.WriteLine($"[Console] Error write command history: {e}");
+            Console.CreateLog(Console.LogType.ERROR, $"Error write command history: {e}");
             
         }
     }   

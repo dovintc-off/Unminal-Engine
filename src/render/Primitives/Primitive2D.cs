@@ -16,8 +16,7 @@ public abstract class Primitive2D : IDisposable {
     private readonly string pathVertex = GetPath.GetCorrectPath(Engine.Paths.Shaders.baseV);
     private readonly string pathFragment = GetPath.GetCorrectPath(Engine.Paths.Shaders.baseF);
 
-    public Primitive2D()
-    {
+    public Primitive2D() {
         InitializeGeometry();
         InitializeShader();
     }
@@ -27,12 +26,12 @@ public abstract class Primitive2D : IDisposable {
         if (ShaderProgram != -1) return;
         if (!File.Exists(pathVertex))
         {
-            Console.WriteLine($"[Primitive2D] Cant load file '{pathVertex}' - cant exist");
+            Console.CreateLog(Console.LogType.ERROR, $"Cant load file '{pathVertex}' - cant exist");
             return;
         }
         if (!File.Exists(pathFragment))
         {
-            Console.WriteLine($"[Primitive2D] Cant load file '{pathFragment}' - cant exist");
+            Console.CreateLog(Console.LogType.ERROR, $"Cant load file '{pathFragment}' - cant exist");
             return; 
         }
         string vertexSource = File.ReadAllText(pathVertex);

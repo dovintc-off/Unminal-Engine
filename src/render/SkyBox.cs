@@ -43,9 +43,6 @@ public class Skybox : IDisposable
         LoadTexture(faces);
     }
 
-    /// <summary>
-    /// Loads, compiles, and links the vertex and fragment shaders for the skybox, and retrieves uniform locations.
-    /// </summary>
     private void LoadShaders()
     {
         string vertCode = File.ReadAllText(GetPath.GetCorrectPath(Engine.Paths.Shaders.skyboxV));
@@ -57,9 +54,8 @@ public class Skybox : IDisposable
         GL.CompileShader(vertShader);
         
         GL.GetShader(vertShader, ShaderParameter.CompileStatus, out int vSuccess);
-        if (vSuccess == 0)
-        {
-            Console.WriteLine("[Skybox.cs:55] Vertex Shader Error: " + GL.GetShaderInfoLog(vertShader));
+        if (vSuccess == 0) {
+            Console.CreateLog(Console.LogType.ERROR, "Vertex Shader Error: " + GL.GetShaderInfoLog(vertShader));
         }
 
         int fragShader = GL.CreateShader(ShaderType.FragmentShader);
@@ -67,9 +63,8 @@ public class Skybox : IDisposable
         GL.CompileShader(fragShader);
 
         GL.GetShader(fragShader, ShaderParameter.CompileStatus, out int fSuccess);
-        if (fSuccess == 0)
-        {
-            Console.WriteLine("[Skybox.cs:65] Fragment Shader Error: " + GL.GetShaderInfoLog(fragShader));
+        if (fSuccess == 0) {
+            Console.CreateLog(Console.LogType.ERROR, "Fragment Shader Error: " + GL.GetShaderInfoLog(fragShader));
         }
 
         _shaderProgram = GL.CreateProgram();
@@ -80,7 +75,7 @@ public class Skybox : IDisposable
         GL.GetProgram(_shaderProgram, GetProgramParameterName.LinkStatus, out int lSuccess);
         if (lSuccess == 0)
         {
-            Console.WriteLine("[Skybox.cs:76] Link Error: " + GL.GetProgramInfoLog(_shaderProgram));
+            Console.CreateLog(Console.LogType.ERROR, "Link Error: " + GL.GetProgramInfoLog(_shaderProgram));
         }
 
         GL.DeleteShader(vertShader);
@@ -91,9 +86,6 @@ public class Skybox : IDisposable
         _skyboxLoc = GL.GetUniformLocation(_shaderProgram, "skybox");
     }
 
-    /// <summary>
-    /// Generates and configures the Vertex Array Object (VAO) and Vertex Buffer Object (VBO) for the skybox cube geometry.
-    /// </summary>
     private void SetupGeometry()
     {
         _vao = GL.GenVertexArray();
@@ -124,7 +116,7 @@ public class Skybox : IDisposable
             {
                 if (!File.Exists(faces[i]))
                 {
-                    Console.WriteLine($"[Skybox.cs:113] Error: File not found: {faces[i]}");
+                    Console.CreateLog(Console.LogType.ERROR, $"File not found: {faces[i]}");
                     GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, 0, PixelInternalFormat.Rgb, 1, 1, 0, PixelFormat.Rgb, PixelType.UnsignedByte, IntPtr.Zero);
                     continue;
                 }
@@ -164,7 +156,7 @@ public class Skybox : IDisposable
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Skybox.cs:153] Error: loading face {i} ({faces[i]}): {ex.Message}");
+                Console.CreateLog(Console.LogType.ERROR, $"Cant Loading face {i} ({faces[i]}): {ex.Message}");
                 GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, 0, PixelInternalFormat.Rgb, 1, 1, 0, PixelFormat.Rgb, PixelType.UnsignedByte, IntPtr.Zero);
             }
         }
@@ -175,20 +167,6 @@ public class Skybox : IDisposable
         GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
         GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
         GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
-    }
-
-    /// <summary>
-    /// Checks the compilation status of a shader and prints an error log if the compilation failed.
-    /// </summary>
-    /// <param name="shader">The OpenGL handle of the shader to check.</param>
-    /// <param name="type">The descriptive label or type of the shader (e.g., "Vertex" or "Fragment").</param>
-    private void CheckShader(int shader, string type)
-    {
-        GL.GetShader(shader, ShaderParameter.CompileStatus, out int success);
-        if (success == 0)
-        {
-            Console.WriteLine($"[Skybox.cs:171] {type} Error: {GL.GetShaderInfoLog(shader)}");
-        }
     }
 
     public void Draw() {

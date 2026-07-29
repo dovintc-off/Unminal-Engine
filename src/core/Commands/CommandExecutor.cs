@@ -3,18 +3,17 @@ using System.Reflection;
 
 [SupportedOSPlatform("windows")]
 public static class CommandExecutor {
-    public static void Execute(string Excommand, ParserCommands parserCommands) {
+    public static void Execute(string Excommand) {
         if (string.IsNullOrWhiteSpace(Excommand)) return;
         
         string trimmed = Excommand.TrimStart('/');
-        List<Command> commands = parserCommands.Parse();
         var tokens = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         
-        Command? current = commands.Find(c => 
+        Command? current = Manager.CommandManager.Commands?.Find(c => 
             string.Equals(c.Name, tokens[0], StringComparison.OrdinalIgnoreCase));
 
         if (current == null) { 
-            Console.WriteLine($"[#red]Unknown root command: {tokens[0]}"); 
+            Console.CreateLog(Console.LogType.WARNING, $"Unknown root command: {tokens[0]}"); 
             return; 
         }
 
@@ -35,17 +34,16 @@ public static class CommandExecutor {
         }
 
         if (!commandFound) {
-            Console.WriteLine($"[#red]Unknown subcommand '{tokens[i]}' for '{current.Name}'. Available: {string.Join(", ", current.Layer.Select(c => c.Name))}");
+            Console.CreateLog(Console.LogType.WARNING, $"Unknown subcommand '{tokens[i]}' for '{current.Name}'. Available: {string.Join(", ", current.Layer.Select(c => c.Name))}");
             return;
         }
 
         if (!current.ExecutedLayer) {
             var subs = current.Layer.Select(c => c.Name);
-            Console.WriteLine($"[INFO] '{current.Name}' requires action. Available: {string.Join(", ", subs)}");
+            Console.CreateLog(Console.LogType.INFO, $"'{current.Name}' requires action. Available: {string.Join(", ", subs)}");
             return;
         }
 
-        // Парсинг оставшейся части строки как аргументов
         int pos = 0;
         int tokenIndex = 0;
         bool inQuotes = false;
@@ -66,18 +64,17 @@ public static class CommandExecutor {
 
         if (finalArgs.Count == 0 && current.ArgsExecuteMethod.Count > 0) return;
 
-        // Вызов метода
         Type type = typeof(CalledMethods);
         MethodInfo? method = type.GetMethod(current.ExecuteMethod!, BindingFlags.Public | BindingFlags.Static);
         if (method != null) {
             bool result = (method.Invoke(null, new object[] { finalArgs }) as bool?) ?? false;
             if (!result) {
-                Console.WriteLine($"[#red]Something went wrong with executing method: \"{current.Name}\"");
+                Console.CreateLog(Console.LogType.ERROR, $"Something went wrong with executing method: \"{current.Name}\"");
             } else {
-                Console.WriteLine("[#green] Executed");
+                Console.CreateLog(Console.LogType.INFO, "Command Executed");
             }
         } else {
-            Console.WriteLine($"[#red]Method \"{current.ExecuteMethod}\" not found");
+            Console.CreateLog(Console.LogType.ERROR, $"Method \"{current.ExecuteMethod}\" not found");
         }
     }   
 }

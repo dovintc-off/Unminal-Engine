@@ -9,7 +9,7 @@ public static class ArgumentProcessor {
             .ToList();
 
         if (userTokens.Count > expectedParams.Count) {
-            Console.WriteLine($"[#red]Too many arguments. Expected {expectedParams.Count}, got {userTokens.Count}.");
+            Console.CreateLog(Console.LogType.WARNING, $"Too many arguments. Expected {expectedParams.Count}, got {userTokens.Count}.");
             return finalArgs;
         }
 
@@ -19,7 +19,7 @@ public static class ArgumentProcessor {
             var parts = rawValue.Split('?', 2);
             
             if (parts.Length < 2) {
-                Console.WriteLine($"[#red]Config Error: Missing '?' in '{argName}'.");
+                Console.CreateLog(Console.LogType.WARNING, $"[#red]Config Error: Missing '?' in '{argName}'.");
                 continue;
             }
 
@@ -56,11 +56,11 @@ public static class ArgumentProcessor {
         foreach (var rule in rules.Split('|')) {
             string r = rule.Trim();
             if (r.StartsWith("type:int") && !int.TryParse(value, out _)) {
-                Console.WriteLine($"[#red]Type Error: '{argName}' must be integer."); return false;
+                Console.CreateLog(Console.LogType.WARNING, $"Type Error: '{argName}' must be integer."); return false;
             } else if (r.StartsWith("type:bool")) {
                 string lowerVal = value.ToLowerInvariant();
                 if (lowerVal != "true" && lowerVal != "false" && lowerVal != "1" && lowerVal != "0") {
-                    Console.WriteLine($"[#red]Type Error: '{argName}' must be boolean."); return false;
+                    Console.CreateLog(Console.LogType.WARNING, $"Type Error: '{argName}' must be boolean."); return false;
                 }
             }
         }
@@ -77,7 +77,7 @@ public static class ArgumentProcessor {
                     var limits = r[sIdx..eIdx].Split(',');
                     if (limits.Length == 2 && int.TryParse(limits[0], out int min) && int.TryParse(limits[1], out int max)) {
                         if (!Command.range(min, max, value)) {
-                            Console.WriteLine($"[#red]Range Error: '{argName}' is out of bounds [{min}-{max}].");
+                            Console.CreateLog(Console.LogType.WARNING, $"Range Error: '{argName}' is out of bounds [{min}-{max}].");
                             return false;
                         }
                     }
@@ -91,7 +91,7 @@ public static class ArgumentProcessor {
         if (logic.StartsWith("error(")) {
             int s = logic.IndexOf('(') + 1;
             int e = logic.LastIndexOf(')');
-            Console.WriteLine($"[#red]{(s > 0 && e > s ? logic[s..e] : "Missing argument")}");
+            Console.CreateLog(Console.LogType.WARNING, $"{(s > 0 && e > s ? logic[s..e] : "Missing argument")}");
             return null;
         } else if (logic.StartsWith("get(")) {
             int s = logic.IndexOf('(') + 1;
@@ -99,7 +99,7 @@ public static class ArgumentProcessor {
             if (s > 0 && e > s) {
                 string path = logic[s..e];
                 var val = Command.get(typeof(Engine), path);
-                if (val == null) Console.WriteLine($"[WARN] Path '{path}' returned null.");
+                if (val == null) Console.CreateLog(Console.LogType.WARNING, $"Path '{path}' returned null.");
                 return val;
             }
         }

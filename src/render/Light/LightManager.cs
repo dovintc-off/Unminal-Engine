@@ -39,7 +39,7 @@ public class LightManager : IDisposable
     {
         if (_lights.Count >= MaxLights)
         {
-            Console.WriteLine($"[LightManager] Max lights limit ({MaxLights}) reached.");
+            Console.CreateLog(Console.LogType.WARNING, $"Max lights limit ({MaxLights}) reached.");
             return;
         }
         _lights.Add(light);

@@ -140,7 +140,7 @@ public class Main : GameWindow {
                 if (Engine.CanF3) {
                     Engine.GlobalWindowState.InDebugMenu = !Engine.GlobalWindowState.InDebugMenu;
                 } else {
-                    Console.WriteLine("[#red][INFO]: No permission to use the debug menu");
+                    Console.CreateLog(Console.LogType.WARNING, "No permission to use the debug menu");
                 }
             }
 
