@@ -12,6 +12,7 @@ public class Console {
     private bool _wasToggleKeyPressed = false;
     private readonly string _pathToFileHistory = GetPath.GetCorrectPath(Engine.Paths.Config.ConsoleHistory);
     private KeyboardState? _prevInput;
+    private static string _prevlog = "";
     public enum LogType {
         ERROR, INFO, WARNING 
     }
@@ -122,6 +123,9 @@ public class Console {
     }
 
     private static void LogToSystemConsole(LogType Level, string LogText, bool CrashGame = false, string CrashError = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0){
+        if (_prevlog == LogText) return;
+        _prevlog = LogText;
+
         var (prefix, textcolor, resetcolor) = Level switch {
             LogType.ERROR => ("[#red][ERROR] ", "[#crimson]", " [#darkgrey]"),
             LogType.INFO =>  ("[#cornflowerblue][INFO] ", "[#white]", " [#darkgrey]"),
@@ -131,8 +135,8 @@ public class Console {
 
         string calledFileName = Path.GetFileName(file);
         string FinalLogText = $"{prefix}{textcolor}{LogText}{resetcolor}Called in {calledFileName}:{line}";
-        Console.WriteLine(FinalLogText);
-        
+
+        WriteLine(FinalLogText);
         History.Add(FinalLogText);
 
         if (CrashGame) {
