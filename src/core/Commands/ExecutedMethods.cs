@@ -40,4 +40,9 @@ public static class CalledMethods {
         Console.WriteLine($"Light display: {(Engine.ShowLight ? "[#green]ON" : "[#red]OFF")}");
         return true;
     }
+
+    public static bool SayHello(Dictionary<string, object> args){
+        Console.CreateLog(Console.LogType.INFO, "Hello!");
+        return true;
+    }
 } 
