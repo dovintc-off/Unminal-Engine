@@ -1,6 +1,32 @@
-# Changelog
-# All changes in project Unminal (earlier EOCS)
-# Project create by Dov1ntc!
+# All changes in project Unminal
+
+## [0.2.4-prerelease-2] - 2026.07.31
+### **Added**
+- **2D Primitives:** *Square* (Rectangle), *Circle*, and *Triangle* (26.07)
+- **Billboard Class:** A rectangle that *always faces the player's camera* (26.07)
+- **New Path Types:** Added `"shader:/"` and `"texture:/"` support in *GetCorrectPath()* (26.07 & 27.07)
+- **GameObject Rotation:** Added `Rotate()` method to `GameObject` class (delta time is handled internally) (27.07)
+- **Flexible Mesh Attributes:** Mesh class now *supports a variable number of vertex attributes* (27.07)
+- **Logging System:** Added `Console.CreateLog` for unified output to both `System` and `Engine` consoles (28.07)
+- **Fonts:** Added *Arial* and *Arial Bold* fonts with *corresponding engine path variables* (30.07)
+- **Command Registration:** Added `AddCommand` method to *register custom Command objects* under a specific command name (30.07)
+
+### **Changed**
+- **Shader Organization:** All shaders are now *located in a single folder* (`Assets/shaders/`) (26.07)
+- **Global Matrices:** `Projection`, `View`, and `Ortho` matrices are now *automatically managed by the Engine class* (Engine.View, Engine.Projection, Engine.Ortho). No manual calculation required (26.07)
+- **Automatic Matrix Passing:** Engine methods *now automatically use global projection matrices* (custom matrix support will be added later) (26.07)
+- **Console Replacement:** Standard `System.Console` has been *replaced by the custom engine Console* class (27.07)
+- **Text Rendering:** Increased *font atlas size* and *optimized text display* settings for better quality (30.07)
+- **Core Logging:** Replaced all `Console.WriteLine` calls in core files with the *new customized logging system* (30.07)
+- **Path Handling:** `Billboard` and `TextRenderer` classes now *automatically resolve file paths internally* (30.07)
+
+### **Fixed**
+- **Command Initialization:** Commands are now `initialized once in Program.cs`. Previously, the command structure was created on the first input, causing a freeze/stutter (30.07)
+- **Duplicate Logs:** Fixed an issue where duplicate log messages were displayed in the console (30.07)
+- **Text Performance:** Multi-colored text is now rendered in a single Draw Call (30.07)
+
+### **For Devs**
+- **Build Process:** The *Assets folder is now automatically copied to the build* output directory during compilation (27.07)
 
 ## [0.2.4-prerelease-1] - 2026.07.25
 ### **Added**
