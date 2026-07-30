@@ -61,7 +61,7 @@ public class Billboard {
     }
 
     public Billboard Texture(string texturePath) {
-        _activeTexture = Texture2D.GetOrCreateFileTexture(texturePath);
+        _activeTexture = Texture2D.GetOrCreateFileTexture(GetPath.GetCorrectPath(texturePath));
         return this;
     }
 

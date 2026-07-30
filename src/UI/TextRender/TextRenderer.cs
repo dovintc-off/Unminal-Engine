@@ -3,7 +3,7 @@ namespace Unminal.UI.TextRender.TextRenderer;
 [SupportedOSPlatform("windows")]
 public class Text : IDisposable
 {
-    private readonly Atlas _fontAtlas;
+    private readonly Atlas? _fontAtlas;
 
     private readonly int _vao;
     private readonly int _vbo;
@@ -13,9 +13,11 @@ public class Text : IDisposable
     private readonly int _locColor;
 
     private readonly List<float> _vertexBuffer = new List<float>();
-    
+    public Text(string fontPath, int fontSize) {
+        new Text(fontPath, fontSize, GetPath.GetCorrectPath(Engine.Paths.Shaders.textV), GetPath.GetCorrectPath(Engine.Paths.Shaders.textF));
+    }
     public Text(string fontPath, int fontSize, string shaderVertex, string shaderFragment) {
-        _fontAtlas = new Atlas(fontPath, fontSize);
+        _fontAtlas = new Atlas(GetPath.GetCorrectPath(fontPath), fontSize);
 
         _vao = GL.GenVertexArray();
         GL.BindVertexArray(_vao);
@@ -83,7 +85,7 @@ public class Text : IDisposable
     }
 
     private void AddCharToBuffer(char c, float x, float y, float scale) {
-        if (!_fontAtlas.TryGetGlyph(c, out var glyph)) return;
+        if (!_fontAtlas!.TryGetGlyph(c, out var glyph)) return;
 
         float w = glyph.Width * _fontAtlas.Width * scale;
         float h = glyph.Height * _fontAtlas.Height * scale;
@@ -116,7 +118,7 @@ public class Text : IDisposable
 
         foreach (char c in text)
         {
-            if (_fontAtlas.TryGetGlyph(c, out var glyph))
+            if (_fontAtlas!.TryGetGlyph(c, out var glyph))
             {
                 AddCharToBuffer(c, currentX, y, scale);
                 currentX += (glyph.Advance + spacing) * scale; 
@@ -138,7 +140,7 @@ public class Text : IDisposable
         GL.Uniform4(_locColor, color);
 
         GL.ActiveTexture(TextureUnit.Texture0);
-        GL.BindTexture(TextureTarget.Texture2D, _fontAtlas.TextureID);
+        GL.BindTexture(TextureTarget.Texture2D, _fontAtlas!.TextureID);
         GL.Uniform1(_locTexture, 0);
 
         GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
@@ -163,7 +165,7 @@ public class Text : IDisposable
         float width = 0f;
         foreach (char c in text)
         {
-            if (_fontAtlas.TryGetGlyph(c, out var glyph))
+            if (_fontAtlas!.TryGetGlyph(c, out var glyph))
             {
                 width += (glyph.Advance + spacing) * scale;
             }
@@ -177,7 +179,7 @@ public class Text : IDisposable
     /// </summary>
     public void Dispose()
     {
-        _fontAtlas.Dispose();
+        _fontAtlas!.Dispose();
         GL.DeleteVertexArray(_vao);
         GL.DeleteBuffer(_vbo);
         GL.DeleteProgram(_shaderProgram);

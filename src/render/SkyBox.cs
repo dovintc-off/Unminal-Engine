@@ -36,8 +36,7 @@ public class Skybox : IDisposable
     /// Initializes a new instance of the Skybox class by loading shaders, setting up geometry, and loading cubemap textures.
     /// </summary>
     /// <param name="faces">An array of file paths to the six texture images representing the skybox faces.</param>
-    public Skybox(string[] faces)
-    {
+    public Skybox(string[] faces) {
         LoadShaders();
         SetupGeometry();
         LoadTexture(faces);
