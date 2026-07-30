@@ -31,6 +31,7 @@ global using Unminal.UI.InputFieldRender;
 global using Unminal.UI.TextRender.FontAtlas;
 global using Unminal.UI.TextRender.Glyph;
 global using Unminal.UI.TextRender.TextRenderer;
+global using Unminal.Render.Texture;
 global using Unminal.Utils.Colors;
 global using Unminal.Utils.GetPath;
 global using Unminal.Core.State;

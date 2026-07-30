@@ -10,6 +10,7 @@ public class MyGame : BaseGame {
     private Text? _textRenderer;
 
     public override void Load(Matrix4 initialProjection) {
+
         ActiveCamera = new Camera(new Vector3(0, 0, 0), -90.0f, 0.0f);
         _objects = LoadObjects(_objects);
 
@@ -46,7 +47,7 @@ public class MyGame : BaseGame {
         skybox!.Draw();
 
         foreach (var obj in _objects) obj.Draw();
-
+        
         new Billboard()
             .Position(new Vector3(15, 8, -40)).Scale(new Vector2(8.0f, 5.0f))
             .Texture("texture:/cat.png").Draw();

@@ -5,14 +5,13 @@
 ======== Plan In order =========
 ================================
 
-1. Create class Billboard (draw with text) (80% completed)
-3. Improve the quality of the text and add the ability to create an outline for the text
-4. Create more ui elements (text field, button, etc.)
-5. Better Console UI (currently, there is only one name for the UI in the console...)
-6. Extensions \ Plugins
-7. Complete class "Config"
-8. Creating primitive shapes from a box (cube, ball, etc.) (3D)
-9. Loading textures for objects
+1. Improve the quality of the text and add the ability to create an outline for the text
+2. Create more ui elements (text field, button, etc.)
+3. Better Console UI (currently, there is only one name for the UI in the console...)
+4. Extensions \ Plugins
+5. Complete class "Config"
+6. Creating primitive shapes from a box (cube, ball, etc.) (3D)
+7. Loading textures for objects
 
 ================================
 ========== ✔ Done ✔ ===========
@@ -27,6 +26,7 @@
 7. Creating primitive shapes from a box (square, circle, triangle, etc.) (2D) (26.07)
 8. Create class Billboard (draw with castom texture) (27.07)
 9. Combine the "Text" & "RichTextSegment" classes into one (30.07)
+10. Create class Billboard (draw with texture) (30.07)
 
 ================================ 
 ======== optimization ==========

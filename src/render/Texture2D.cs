@@ -2,26 +2,21 @@ using StbImageSharp;
 namespace Unminal.Render.Texture;
 
 [SupportedOSPlatform("windows")]
-public class Texture2D : IDisposable
-{
+public class Texture2D : IDisposable {
     public int Handle { get; private set; }
     public int Width { get; private set; }
     public int Height { get; private set; }
 
-    // Два независимых кэша: для одноцветов 1x1 и для полноценных картинок с диска
     private static readonly Dictionary<Vector4, Texture2D> _colorCache = new();
     private static readonly Dictionary<string, Texture2D> _fileCache = new();
 
-    private Texture2D(int handle, int width, int height)
-    {
+    private Texture2D(int handle, int width, int height) {
         Handle = handle;
         Width = width;
         Height = height;
     }
 
-    // Логика загрузки полноценного файла (используется внутри GetOrCreateFileTexture)
-    private static Texture2D LoadFromFile(string path)
-    {
+    private static Texture2D LoadFromFile(string path) {
         int handle = GL.GenTexture();
         GL.BindTexture(TextureTarget.Texture2D, handle);
 
@@ -32,8 +27,7 @@ public class Texture2D : IDisposable
 
         StbImage.stbi_set_flip_vertically_on_load(1);
         int width, height;
-        using (Stream stream = File.OpenRead(path))
-        {
+        using (Stream stream = File.OpenRead(path)) {
             ImageResult image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
             width = image.Width;
             height = image.Height;
@@ -47,26 +41,18 @@ public class Texture2D : IDisposable
         return new Texture2D(handle, width, height);
     }
 
-    // Менеджер ресурсов для файлов: защищает от повторного чтения диска
-    public static Texture2D GetOrCreateFileTexture(string path)
-    {
+    public static Texture2D GetOrCreateFileTexture(string path) {
         if (_fileCache.TryGetValue(path, out var cachedTexture))
-        {
             return cachedTexture;
-        }
 
         Texture2D newTexture = LoadFromFile(path);
         _fileCache.Add(path, newTexture);
         return newTexture;
     }
 
-    // Менеджер ресурсов для цветов 1x1 в оперативной памяти
-    public static Texture2D GetOrCreateColorTexture(Vector4 color)
-    {
+    public static Texture2D GetOrCreateColorTexture(Vector4 color) {
         if (_colorCache.TryGetValue(color, out var cachedTexture))
-        {
             return cachedTexture;
-        }
 
         byte r = (byte)(Math.Clamp(color.X, 0f, 1f) * 255);
         byte g = (byte)(Math.Clamp(color.Y, 0f, 1f) * 255);
@@ -91,13 +77,11 @@ public class Texture2D : IDisposable
         return newTexture;
     }
 
-    public void Dispose()
-    {
+    public void Dispose() {
         GL.DeleteTexture(Handle);
     }
 
-    public static void ClearAllCaches()
-    {
+    public static void ClearAllCaches() {
         foreach (var tex in _colorCache.Values) tex.Dispose();
         foreach (var tex in _fileCache.Values)  tex.Dispose();
         _colorCache.Clear();

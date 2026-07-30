@@ -1,8 +1,7 @@
 namespace Unminal.UI.TextRender.TextRenderer;
 
 [SupportedOSPlatform("windows")]
-public class Text : IDisposable
-{
+public class Text : IDisposable {
     private readonly Atlas? _fontAtlas;
 
     private readonly int _vao;
@@ -85,7 +84,6 @@ public class Text : IDisposable
         _vertexBuffer.Add(color.X); _vertexBuffer.Add(color.Y); _vertexBuffer.Add(color.Z); _vertexBuffer.Add(color.W);
     }
 
-
     private void AddCharToBuffer(char c, float x, float y, float scale, Vector4 color) {
         if (!_fontAtlas!.TryGetGlyph(c, out var glyph)) return;
 
@@ -106,9 +104,8 @@ public class Text : IDisposable
         AddVertex(x2, y2, 0.0f, u2, v2, color);
         AddVertex(x1, y2, 0.0f, u1, v2, color);
     }
-
+    
     public void DrawString(string text, float x, float y, float scale, Vector4 defaultColor, float spacing = 1.0f) {
-        // GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
         Matrix4 projection = Engine.Ortho;
         if (string.IsNullOrEmpty(text)) return;
 

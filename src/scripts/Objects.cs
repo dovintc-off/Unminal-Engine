@@ -22,7 +22,7 @@ public class Objects {
         Scene.teapot1.Scale = new Vector3(0.2f);
         Scene.teapot1.Color = Colors.Green;
         _objects.Add(Scene.teapot1);
-
+        
         return _objects;
     }
 }
