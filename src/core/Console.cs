@@ -1,5 +1,6 @@
 namespace Unminal.Core.EngineConsole;
 using System.Runtime.CompilerServices;
+using SixLabors.Fonts;
 
 [SupportedOSPlatform("windows")]
 public class Console {
@@ -7,7 +8,6 @@ public class Console {
     public static List<string> History {get; private set;} = new List<string>();
     public static Console? Instance { get; private set; }
     private Text? _textRenderer;
-    private RichTextSegment? _richTextRenderer;
     public string InputedCommand {get; private set;} = "";
     private bool _wasToggleKeyPressed = false;
     private readonly string _pathToFileHistory = GetPath.GetCorrectPath(Engine.Paths.Config.ConsoleHistory);
@@ -28,7 +28,6 @@ public class Console {
         Instance = this;
         History = ReadHistory();
         IsOpen = isOpen;
-        _richTextRenderer = new RichTextSegment(new Vector4(1, 1, 1, 1));
         _textRenderer = new Text(
             GetPath.GetCorrectPath(Engine.Paths.Fonts.Arial),
             32,
@@ -97,9 +96,9 @@ public class Console {
 
     public static void WriteLine(object text){
         string safeText = text?.ToString() ?? string.Empty;
-        List<RichTextSegment.TextPart> Parts;
-        Parts = RichTextSegment.ParseColor(safeText, new Vector4(Colors.White, 1));
-        foreach (RichTextSegment.TextPart part in Parts) { 
+        List<Text.TextPart> Parts;
+        Parts = Text.ParseColor(safeText, new Vector4(Colors.White, 1));
+        foreach (Text.TextPart part in Parts) { 
             Vector3 vec3Color = Colors.VEC3toRGB(new Vector3(part.TextColor));
             System.Console.Write($"\x1b[38;2;{vec3Color[0]};{vec3Color[1]};{vec3Color[2]}m{part.Text}\x1b[0m");
         }
@@ -108,9 +107,9 @@ public class Console {
 
     public static void Write(object text){
         string safeText = text?.ToString() ?? string.Empty;
-        List<RichTextSegment.TextPart> Parts;
-        Parts = RichTextSegment.ParseColor(safeText, new Vector4(Colors.White, 1));
-        foreach (RichTextSegment.TextPart part in Parts) { 
+        List<Text.TextPart> Parts;
+        Parts = Text.ParseColor(safeText, new Vector4(Colors.White, 1));
+        foreach (Text.TextPart part in Parts) { 
             Vector3 vec3Color = Colors.VEC3toRGB(new Vector3(part.TextColor));
             System.Console.Write($"\x1b[38;2;{vec3Color[0]};{vec3Color[1]};{vec3Color[2]}m{part.Text}\x1b[0m");
         }
@@ -165,7 +164,7 @@ public class Console {
 
         int index = 0;
         foreach (var line in History) {
-            _richTextRenderer?.Draw(_textRenderer!, $"{line}", 10, 50 * index, 0.8f);
+            _textRenderer?.DrawString($"{line}", 10, 50 * index, 0.8f, new Vector4(Colors.White, 1));
             index++;
         }
 

@@ -6,7 +6,6 @@
 ================================
 
 1. Create class Billboard (draw with text) (80% completed)
-2. Combine the "Text" & "RichTextSegment" classes into one
 3. Improve the quality of the text and add the ability to create an outline for the text
 4. Create more ui elements (text field, button, etc.)
 5. Better Console UI (currently, there is only one name for the UI in the console...)
@@ -27,6 +26,7 @@
 6. Simplify the creation of an object (in any way) (25.07) I thought it would be more difficult
 7. Creating primitive shapes from a box (square, circle, triangle, etc.) (2D) (26.07)
 8. Create class Billboard (draw with castom texture) (27.07)
+9. Combine the "Text" & "RichTextSegment" classes into one (30.07)
 
 ================================ 
 ======== optimization ==========

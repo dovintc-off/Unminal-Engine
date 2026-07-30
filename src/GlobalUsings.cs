@@ -28,7 +28,6 @@ global using Unminal.Render.Billboards;
 global using Unminal.Script.Core;
 global using Console = Unminal.Core.EngineConsole.Console;
 global using Unminal.UI.InputFieldRender;
-global using Unminal.UI.TextRender.RichText;
 global using Unminal.UI.TextRender.FontAtlas;
 global using Unminal.UI.TextRender.Glyph;
 global using Unminal.UI.TextRender.TextRenderer;

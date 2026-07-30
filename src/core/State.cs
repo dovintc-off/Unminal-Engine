@@ -18,7 +18,7 @@ public static class Engine {
     // Matrix
     public static Matrix4 Projection {get; set;}
     public static Matrix4 View {get; set;}
-    public static Matrix4 Ortho {get; set;}
+    public static Matrix4 Ortho {get; set;}    
     // idk why im added this but perhaps in the 
     // future the meaning and uniqueness engine will be 
     // that it is easy to create a network division (maybe)

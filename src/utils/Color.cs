@@ -118,7 +118,7 @@ public static class Colors
     public static Vector4 HEXtoVEC4(string input) {
         if (string.IsNullOrEmpty(input)) return new Vector4(1f, 1f, 1f, 1f);
         if (TryGetNamedColor(input, out var namedColor)) return namedColor;
-        var (isValid, len) = IsValidHEX(input);
+        var isValid = IsValidHEX(input);
         if (!isValid) return new Vector4(1f, 1f, 1f, 1f);
         return HEXtoRGBA(input);
     }
@@ -129,8 +129,8 @@ public static class Colors
     public static bool IsValidRGBA(int r, int g, int b, int a) 
         => IsValidRGB(r, g, b) && a is >= 0 and < 256;
 
-    public static (bool IsValid, int Length) IsValidHEX(string row)  {
-        if (string.IsNullOrEmpty(row)) return (false, 0);
+    public static bool IsValidHEX(string row)  {
+        if (string.IsNullOrEmpty(row)) return false;
         int len = row.Length;
         if (len == 6 || len == 8) {
             bool allValid = true;
@@ -140,9 +140,9 @@ public static class Colors
                     break;
                 }
             }   
-            if (allValid) return (true, len);
+            if (allValid) return true;
         }
-        return (false, len);
+        return false;
     }
 
     public static Vector3 VEC3toRGB(Vector3 color) {
@@ -152,13 +152,13 @@ public static class Colors
         return new Vector3(r, g, b);
     }
 
-    public static (bool IsValid, int Length) IsValidHEX(Vector4 color) {
+    public static bool IsValidHEX(Vector4 color) {
         bool valid = color.X is >= 0f and <= 1f &&
                     color.Y is >= 0f and <= 1f &&
                     color.Z is >= 0f and <= 1f &&
                     color.W is >= 0f and <= 1f;
         
-        return (valid, 4);
+        return valid;
     }
 
     public static bool TryGetNamedColor(string name, out Vector4 color) 
