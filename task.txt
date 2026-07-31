@@ -5,13 +5,13 @@
 ======== Plan In order =========
 ================================
 
-1. Improve the quality of the text and add the ability to create an outline for the text
-2. Create more ui elements (text field, button, etc.)
-3. Better Console UI (currently, there is only one name for the UI in the console...)
-4. Extensions \ Plugins
-5. Complete class "Config"
-6. Creating primitive shapes from a box (cube, ball, etc.) (3D)
-7. Loading textures for objects
+1. Create more ui elements (text field, button, etc.)
+2. Better Console UI (currently, there is only one name for the UI in the console...)
+3. Extensions \ Plugins
+4. Complete class "Config"
+5. Creating primitive shapes from a box (cube, ball, etc.) (3D)
+6. Loading textures for objects
+7. Add the ability to create an outline for the text (Im so hate this stupid text development)
 
 ================================
 ========== ✔ Done ✔ ===========
@@ -32,5 +32,5 @@
 ======== optimization ==========
 ================================
 
-1. Caching the command structure ✖
+1. Caching the command structure ✔
 2. Text, console, and skybox should be made static. ✖
