@@ -31,6 +31,7 @@ global using Unminal.Render.Billboards;
 global using Unminal.UI.InputFieldRender;
 global using Unminal.UI.ButtonRender;
 global using Unminal.UI.ButtonEngine;
+global using Unminal.UI.ButtonObject;
 global using Unminal.UI.TextRender.FontAtlas;
 global using Unminal.UI.TextRender.Glyph;
 global using Unminal.UI.TextRender.TextRenderer;

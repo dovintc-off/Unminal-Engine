@@ -4,7 +4,7 @@
     "Debug": true,
     "Canf3": true,
     "WindowSettings": {
-        "VSync": false,
+        "VSync": true,
         "Height": 900,
         "Width": 1300
     },
