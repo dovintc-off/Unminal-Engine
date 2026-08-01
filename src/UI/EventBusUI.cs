@@ -3,14 +3,18 @@ namespace Unminal.UI.EventBus;
 public interface IEventUI {}
 
 public struct ButtonPressedEvent : IEventUI {
+    public uint ButtonId;
     // Code here
 }
 
 public struct ButtonHeldEvent : IEventUI {
+    public uint ButtonId;
+    public float Duration;
     // Code here
 }
 
 public struct ButtonRelesedEvent : IEventUI {
+    public uint ButtonId;
     // Code here
 }
 
@@ -26,7 +30,7 @@ public static class EventBusUi {
     public static void Publish<T>(T Event) where T : IEventUI {
         Type eventType = typeof(T);
         if (_subs.TryGetValue(eventType, out var handler)) {
-            for (int i = handler.Count; i >= 0; i--) {
+            for (int i = handler.Count - 1; i >= 0; i--) {
                 var act = (Action<T>)handler[i];
                 act.Invoke(Event);
             }

@@ -4,7 +4,7 @@ namespace Unminal.Render.Primitive._2D;
 public class Square : Primitive2D {
     public Square(Vector2 position, Vector2 scale, Vector4 color, float rotation) {
         Position = position;
-        Scale = Vector2.One;
+        Scale = scale;
         Rotation = rotation;
         Color = color;
         
@@ -12,9 +12,9 @@ public class Square : Primitive2D {
 
         float[] vertices = {
             0.0f, 0.0f,
-            scale.X, 0.0f,
-            scale.X, scale.Y,
-            0.0f, scale.Y
+            1.0f, 0.0f,
+            1.0f, 1.0f,
+            0.0f, 1.0f
         };
         
         VertexCount = vertices.Length / 2;
@@ -32,4 +32,22 @@ public class Square : Primitive2D {
     }
 
     protected override float[] GetVertices() => Array.Empty<float>();
+
+    public bool Contains(Vector2 point) {
+        Vector2 localPoint = point - Position;
+
+        if (Rotation != 0.0f) {
+            Vector2 pivotPixels = new Vector2(Pivot.X * Scale.X, Pivot.Y * Scale.Y);
+            localPoint -= pivotPixels;
+
+            float angleRad = -MathHelper.DegreesToRadians(Rotation);
+            float cos = MathF.Cos(angleRad);
+            float sin = MathF.Sin(angleRad);
+
+            localPoint = new Vector2(localPoint.X * cos - localPoint.Y * sin, localPoint.X * sin + localPoint.Y * cos);
+        } 
+
+        return localPoint.X >= 0.0f && localPoint.X <= Scale.X &&
+               localPoint.Y >= 0.0f && localPoint.Y <= Scale.Y;
+    }
 }

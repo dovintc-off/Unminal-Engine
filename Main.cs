@@ -110,6 +110,7 @@ public class Main : GameWindow {
         Engine.View = _view;
         Engine.CurrentKeyboard = input;
         Engine.CurrentMouse = mouse;
+        Engine.CurrentCursorState = CursorState;
 
         if (!IsFocused) return;
 
@@ -117,7 +118,7 @@ public class Main : GameWindow {
             Engine.GlobalWindowState.InPause = !Engine.GlobalWindowState.InPause;
             CursorState = Engine.GlobalWindowState.InPause ? CursorState.Normal : CursorState.Grabbed;
         }
-        if (Engine.GlobalWindowState.InPause) return;
+        // if (Engine.GlobalWindowState.InPause) return;
 
         if (gameConsole == null) throw new Exception("[#red][ERROR]: Console Is Null"); 
 
@@ -148,7 +149,7 @@ public class Main : GameWindow {
         }
 
         // Script Update Data
-        if ((gameConsole == null || !gameConsole.IsOpen) && !Engine.GlobalWindowState.InPause) {
+        if (gameConsole == null || !gameConsole.IsOpen) {
             _userGame.Update();
 
             if (_userGame.ActiveCamera != null) {

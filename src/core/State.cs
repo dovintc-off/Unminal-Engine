@@ -11,6 +11,7 @@ public static class Engine {
     public static double TotalTime {get; set;}
     public static KeyboardState? CurrentKeyboard {get; set;}
     public static MouseState? CurrentMouse {get; set;}
+    public static CursorState CurrentCursorState {get; set;}
     // Menu state
     public static bool CanF3 {get; set;} = true;
     public static bool IsDebug {get; set;}
