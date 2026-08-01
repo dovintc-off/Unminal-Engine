@@ -1,6 +1,5 @@
 namespace Unminal.Core.EngineConsole;
 using System.Runtime.CompilerServices;
-using SixLabors.Fonts;
 
 [SupportedOSPlatform("windows")]
 public class Console {
@@ -29,8 +28,8 @@ public class Console {
         History = ReadHistory();
         IsOpen = isOpen;
         _textRenderer = new Text(
-            GetPath.GetCorrectPath(Engine.Paths.Fonts.Arial),
-            32,
+            GetPath.GetCorrectPath(Engine.Paths.Fonts.PFAgoraSlabPro_Bold),
+            256,
             GetPath.GetCorrectPath(Engine.Paths.Shaders.textV),
             GetPath.GetCorrectPath(Engine.Paths.Shaders.textF)
         );
@@ -164,11 +163,11 @@ public class Console {
 
         int index = 0;
         foreach (var line in History) {
-            _textRenderer?.DrawString($"{line}", 10, 50 * index, 0.8f, new Vector4(Colors.White, 1));
+            _textRenderer?.DrawString($"{line}", 10, 20 * index, 15f, new Vector4(Colors.White, 1));
             index++;
         }
 
-        _textRenderer?.DrawString(InputedCommand, 10, Engine.WindowSize.Y - 30, 0.5f, new Vector4(Colors.White, 1f), 1f);
+        _textRenderer?.DrawString(InputedCommand, 10, Engine.WindowSize.Y - 30, 15f, new Vector4(Colors.White, 1f), 1f);
         GL.Enable(EnableCap.DepthTest);
         
     }

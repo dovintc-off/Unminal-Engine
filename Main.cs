@@ -72,9 +72,9 @@ private PerformanceMonitor? _perfMonitor;
             _lightingPipeline = new ForwardUBOPipeline(_lightManager);
         }
 
-        #if DEBUG
-        _perfMonitor = new PerformanceMonitor();
-        #endif
+#if DEBUG
+_perfMonitor = new PerformanceMonitor();
+#endif
 
         _lightingPipeline.Initialize();
 
@@ -127,7 +127,6 @@ private PerformanceMonitor? _perfMonitor;
             Engine.GlobalWindowState.InPause = !Engine.GlobalWindowState.InPause;
             CursorState = Engine.GlobalWindowState.InPause ? CursorState.Normal : CursorState.Grabbed;
         }
-        // if (Engine.GlobalWindowState.InPause) return;
 
         if (gameConsole == null) throw new Exception("[#red][ERROR]: Console Is Null"); 
 

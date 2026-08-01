@@ -9,7 +9,7 @@ public class Text : IDisposable {
     private readonly int _shaderProgram;
     private readonly int _locProjection;
     private readonly int _locTexture;
-
+    private float FontSize;
     private readonly List<float> _vertexBuffer = new List<float>();
     private const int VERTEX_SIZE = 9;
 
@@ -18,6 +18,7 @@ public class Text : IDisposable {
     {}
 
     public Text(string fontPath, int fontSize, string shaderVertex, string shaderFragment) {
+        FontSize = fontSize;
         _fontAtlas = new Atlas(GetPath.GetCorrectPath(fontPath), fontSize);
 
         _vao = GL.GenVertexArray();
@@ -130,8 +131,8 @@ public class Text : IDisposable {
             }
             char c = text[i];
             if (_fontAtlas!.TryGetGlyph(c, out var glyph)) {
-                AddCharToBuffer(c, currentX, y, scale, curColor);
-                currentX += (glyph.Advance + spacing) * scale;
+                AddCharToBuffer(c, currentX, y, scale / FontSize, curColor);
+                currentX += (glyph.Advance + spacing) * (scale / FontSize);
             }
             i++;
         }

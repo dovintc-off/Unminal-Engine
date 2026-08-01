@@ -9,20 +9,17 @@ public class Atlas : IDisposable
     public int TextureID {get; private set;}
     public int Width {get; private set;}
     public int Height {get; private set;}
-
     private ConcurrentDictionary<char, GlyphData> _glyphs = new ConcurrentDictionary<char, GlyphData>();
 
     private const string Charset = Engine.LanguageChars.EN + Engine.LanguageChars.RU + """0123456789 .,!?-_+*/|\=()[]{}<>:;"'@#$%^""";
 
-    public Atlas(string fontPath, int fontSize, int atlasSize = 2048)
-    {
+    public Atlas(string fontPath, int fontSize, int atlasSize = 4096) {
         Width = atlasSize;
         Height = atlasSize;
         GenerateAtlas(fontPath, fontSize);
     }
 
-    private void GenerateAtlas(string fontPath, int fontSize)
-    {
+    private void GenerateAtlas(string fontPath, int fontSize) {
         using var pfc = new System.Drawing.Text.PrivateFontCollection();
         pfc.AddFontFile(fontPath);
         var family = pfc.Families[0];
@@ -31,8 +28,7 @@ public class Atlas : IDisposable
         using var graphics = Graphics.FromImage(bitmap);
 
         // graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
-        graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-
+        
         graphics.Clear(Color.Transparent);
 
         var format = StringFormat.GenericTypographic;

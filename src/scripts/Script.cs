@@ -1,7 +1,7 @@
 namespace Unminal.Script;
 
 using Unminal.Core.Commands.Manager;
-using static Unminal.Script.Objects;
+using static Unminal.Script.Scene;
 
 [SupportedOSPlatform("windows")]
 public class MyGame : BaseGame {
@@ -9,51 +9,22 @@ public class MyGame : BaseGame {
     private Skybox? skybox;
     private Text? _textRenderer;
 
-    private EngineButton? _uiButtonLogic1;
-    private RenderButton? _uiButtonVisual1;
-    private EngineButton? _uiButtonLogic2;
-    private RenderButton? _uiButtonVisual2;
-
     public override void Load(Matrix4 initialProjection) {
-
         EventBusUi.Subscribe<ButtonPressedEvent>(OnBtnPress);
         EventBusUi.Subscribe<ButtonHeldEvent>(OnBtnHeld);
         EventBusUi.Subscribe<ButtonRelesedEvent>(OnBtnReleased);
 
         ActiveCamera = new Camera(new Vector3(0, 0, 0), -90.0f, 0.0f);
-        _objects = LoadObjects(_objects);
+        _objects = LoadScene(_objects);
 
         Engine.LightManager?.ClearLights();
         Engine.LightManager?.AddLight(new LightData(new Vector3(0, 0, 0), Colors.White, 30f));
 
-        _textRenderer = new Text("font:/Arial/arialmt.ttf", 32);
+        _textRenderer = new Text("font:/PFAgoraSlabPro-Bold.ttf", 256);
 
         skybox = new Skybox(Engine.Paths.BaseSkyBoxAssets);
 
-        (_uiButtonLogic1, _uiButtonVisual1) = UIFactory.CreateButton(
-            pos:new Vector2(50f, 50f), 
-            scale:new Vector2(20f, 20f), 
-            rotation:0f,
-            color:Colors.Blue,
-            hoveredColor:Colors.Green
-        );
-
-        (_uiButtonLogic2, _uiButtonVisual2) = UIFactory.CreateButton(
-            pos:new Vector2(100f, 100f), 
-            scale:new Vector2(20f, 20f), 
-            rotation:0f,
-            color:Colors.Blue,  
-            hoveredColor:Colors.Green
-        );
-
-        Command myCommand = new Command(){
-            Name = "SayHello",
-            Layer = null!,
-            ExecuteMethod = "SayHello",
-            ExecutedLayer = true
-        };
-
-        CommandManager.AddCommand("debug", myCommand);
+        CommandManager.AddCommand("debug", new Command(){Name = "SayHello", Layer = null!, ExecuteMethod = "SayHello", ExecutedLayer = true});
     }
 
     public void OnBtnPress(ButtonPressedEvent e) =>
@@ -70,12 +41,11 @@ public class MyGame : BaseGame {
         
         if (Engine.Player.CameraObj == null) return;
 
-        _uiButtonLogic1?.Update();
-        _uiButtonLogic2?.Update();
+        btn1?.Update();
 
-        Scene.teapot1?.Rotate(90f, "x");
-        Scene.cube1?.Rotate(90f, "y");
-        Scene.cube2?.Rotate(90f, "z");
+        teapot1?.Rotate(90f, "x");
+        cube1?.Rotate(90f, "y");
+        cube2?.Rotate(90f, "z");
 
         Engine.LightManager?.ClearLights();
         Engine.LightManager?.AddLight(new LightData(Engine.Player.CameraObj.Position, Colors.White, 30f));
@@ -89,12 +59,9 @@ public class MyGame : BaseGame {
         new Billboard()
             .Position(new Vector3(15, 8, -40)).Scale(new Vector2(8.0f, 5.0f))
             .Texture("texture:/cat.png").Draw();
-
-        if (_uiButtonLogic1 != null) {
-            _uiButtonVisual1?.Draw(_uiButtonLogic1);
-        }
-        if (_uiButtonLogic2 != null) {
-            _uiButtonVisual2?.Draw(_uiButtonLogic2);
+        if (Console.Instance!.IsOpen) {
+            Scene.btn1?.Draw();
+            _textRenderer!.DrawString("Hello!", 200, 200, 20, new Vector4(1, 1, 1, 1));
         }
     }
 
@@ -108,5 +75,6 @@ public class MyGame : BaseGame {
         Billboard.Dispose();
         _textRenderer?.Dispose();
         skybox?.Dispose();
+        Scene.btn1?.Dispose();
     }
 }
