@@ -1,5 +1,7 @@
 namespace Unminal.Main;
 
+using Unminal.Utils.Diagnostics;
+
 [SupportedOSPlatform("windows")]
 public class Main : GameWindow {
     private readonly BaseGame _userGame;
@@ -11,7 +13,10 @@ public class Main : GameWindow {
     private LightManager? _lightManager;
     private ILightingPipeline? _lightingPipeline;
     private Dictionary<string, string> _debugTexts = new();
-
+    private float _smoothFps = 60f;
+#if DEBUG
+private PerformanceMonitor? _perfMonitor;
+#endif
     public Main(BaseGame userGame) : base(
             new GameWindowSettings() { UpdateFrequency = 0 }, 
             new NativeWindowSettings(){ 
@@ -43,8 +48,8 @@ public class Main : GameWindow {
 
 
         _textRenderer = new Text(
-            GetPath.GetCorrectPath(Engine.Paths.Fonts.Arial),
-            32,
+            GetPath.GetCorrectPath(Engine.Paths.Fonts.VCR_OSD_MONO),
+            256,
             GetPath.GetCorrectPath(Engine.Paths.Shaders.textV),
             GetPath.GetCorrectPath(Engine.Paths.Shaders.textF)
         );
@@ -66,6 +71,10 @@ public class Main : GameWindow {
         } else {
             _lightingPipeline = new ForwardUBOPipeline(_lightManager);
         }
+
+        #if DEBUG
+        _perfMonitor = new PerformanceMonitor();
+        #endif
 
         _lightingPipeline.Initialize();
 
@@ -171,7 +180,7 @@ public class Main : GameWindow {
         }
     }
 
-    protected override void OnRenderFrame(FrameEventArgs e) {   
+    protected override void OnRenderFrame(FrameEventArgs e) {  
         base.OnRenderFrame(e);
 
         Engine.WindowSize = new Vector2i(Size.X, Size.Y);
@@ -200,13 +209,13 @@ public class Main : GameWindow {
 
         Matrix4 ortho = Matrix4.CreateOrthographicOffCenter(0, Size.X, Size.Y, 0, -1, 1);
         Engine.Ortho = ortho;
-
+        float currentFps = 1.0f / Engine.DeltaTime;
+        _smoothFps = _smoothFps + (currentFps - _smoothFps) * 0.05f;
         // Debug Menu
         if (_textRenderer != null && Engine.GlobalWindowState.InDebugMenu && _activeCameraRef != null) {
-            float TS = 0.5f;
-            
-            _debugTexts["name"] = $"Unminal V0.2.3";
-            _debugTexts["fps"] = $"FPS: {1.0 / e.Time:F1}";
+            float TS = 20f;
+            _debugTexts["name"] = $"Unminal V0.2.4-prerelease-2";
+            _debugTexts["fps"] = $"LERP FPS: {_smoothFps:F0}";
             _debugTexts["pos&fov"] = string.Format(CultureInfo.InvariantCulture,
                 "Pos: {0:F1} {1:F1} {2:F1} | FOV: {3}", 
                 _activeCameraRef.Position.X, _activeCameraRef.Position.Y, _activeCameraRef.Position.Z, 
@@ -214,11 +223,17 @@ public class Main : GameWindow {
             _debugTexts["direction"] = string.Format(CultureInfo.InvariantCulture, 
                 "Dir: {0:F1} {1:F1} {2:F1}", 
                 _activeCameraRef.Front.X, _activeCameraRef.Front.Y, _activeCameraRef.Front.Z);
-    
-            _textRenderer.DrawString(_debugTexts["name"], 10, 7, TS, new Vector4(Colors.White, 1f), 2f);
-            _textRenderer.DrawString(_debugTexts["fps"], 10, 63, TS, new Vector4(Colors.White, 1f), 1f); 
-            _textRenderer.DrawString(_debugTexts["pos&fov"], 10, 91, TS, new Vector4(Colors.White, 1f), 1f);
-            _textRenderer.DrawString(_debugTexts["direction"], 10, 119, TS, new Vector4(Colors.White, 1f), 1f); 
+            _debugTexts["pc-Resources"] = "PC resources: Telemetry Disabled";
+
+#if DEBUG
+if (_perfMonitor != null)
+    _debugTexts["pc-Resources"] = $"{_perfMonitor.GetMemory()} | {_perfMonitor.GetCPU()} | {_perfMonitor.GetGPU()}";
+#endif
+            _textRenderer.DrawString(_debugTexts["name"], 10, 5, TS, new Vector4(Colors.White, 1f), 2f);
+            _textRenderer.DrawString(_debugTexts["fps"], 10, 30, TS, new Vector4(Colors.White, 1f), 1f); 
+            _textRenderer.DrawString(_debugTexts["pos&fov"], 10, 55, TS, new Vector4(Colors.White, 1f), 1f);
+            _textRenderer.DrawString(_debugTexts["direction"], 10, 80, TS, new Vector4(Colors.White, 1f), 1f); 
+            _textRenderer.DrawString(_debugTexts["pc-Resources"], 10, 105, TS, new Vector4(Colors.White, 1f), 1f);
 
         }
         Context.SwapBuffers();
@@ -246,6 +261,9 @@ public class Main : GameWindow {
         Engine.ConfigManager?.SetConfig(newDebug: $"{Engine.IsDebug}");
         Engine.ConfigManager?.SetConfig(newWidth: $"{Engine.WindowSize.X}");
         Engine.ConfigManager?.SetConfig(newHeight: $"{Engine.WindowSize.Y}");
+#if DEBUG
+_perfMonitor!.Dispose();
+#endif
     }
 
     protected override void OnMouseWheel(MouseWheelEventArgs e) {
