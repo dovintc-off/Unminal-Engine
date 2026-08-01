@@ -1,3 +1,6 @@
+// Unminal Engine - Copyright (C) 2026 Dov1ntc
+// Licensed under GNU AGPLv3 with No-Misattribution Addendum
+// See LICENSE file for details.
 // Im take this code with another my project "SyncraRPC"
 // now these two projects are running on the same config system
 // im chnge it but this is soo cool))) 

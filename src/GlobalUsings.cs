@@ -1,3 +1,6 @@
+// Unminal Engine - Copyright (C) 2026 Dov1ntc
+// Licensed under GNU AGPLv3 with No-Misattribution Addendum
+// See LICENSE file for details.
 global using OpenTK.Windowing.GraphicsLibraryFramework;
 global using OpenTK.Mathematics;
 global using System.Drawing;

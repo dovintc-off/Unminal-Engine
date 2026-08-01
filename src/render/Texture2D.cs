@@ -1,3 +1,6 @@
+// Unminal Engine - Copyright (C) 2026 Dov1ntc
+// Licensed under GNU AGPLv3 with No-Misattribution Addendum
+// See LICENSE file for details.
 using StbImageSharp;
 namespace Unminal.Render.Texture;
 
@@ -88,3 +91,4 @@ public class Texture2D : IDisposable {
         _fileCache.Clear();
     }
 }
+
