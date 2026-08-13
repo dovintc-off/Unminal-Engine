@@ -5,9 +5,11 @@ debug/
 [Pp]roperties/
 
 # My
-.env
+*.env
+Без названия.canvas
 /.txt
 /tree.txt
+/.obsidian
 
 # VS Code specific
 .vscode/*

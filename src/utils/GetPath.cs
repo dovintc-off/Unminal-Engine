@@ -56,7 +56,7 @@ public static class GetPath {
             basePath = Engine.Paths.BaseFolder;
         }
 
-        Console.CreateLog(Console.LogType.INFO, $"Load file: {Path.Combine(basePath, cleanPath.Trim())}", file:file, line:line);
+        Log.Create(Log.LogType.INFO, $"Load file: {Path.Combine(basePath, cleanPath.Trim())}", file:file, line:line);
         return Path.Combine(basePath, cleanPath.Trim());
     }
 
@@ -69,7 +69,7 @@ public static class GetPath {
         for (int i = 0; i < virtualPaths.Length; i++) {
             try {
                 result[i] = GetCorrectPath(virtualPaths[i]);
-            } catch (Exception ex) when (ex is ArgumentException or Exception) {
+            } catch (Exception ex) {
                 throw new InvalidOperationException($"Failed to resolve path at index [{i}] ('{virtualPaths[i]}'): {ex.Message}", ex);
             }
         }

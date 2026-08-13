@@ -101,6 +101,12 @@ public class Config {
             "LocationY" => config.Changeable.WindowSettings.LocationY,
             "LightType" => config.Changeable.LightType,
             "Canf3" => config.Changeable.Canf3,
+            "ActiveBackend" => config.Changeable.Scripts.ActiveBackend,
+            "LuaEntryFile" => config.Changeable.Scripts.LuaEntryFile,
+            "CsharpEntryNameSpace" => config.Changeable.Scripts.CsharpEntryNameSpace,
+            "ScriptDrawer" => config.Changeable.Scripts.Drawer,
+            "ScriptLoader" => config.Changeable.Scripts.Loader,
+            "ScriptUpdater" => config.Changeable.Scripts.Updater,
             _ => throw new Exception($"{key} not found in config")
         };
 
@@ -168,6 +174,7 @@ public class ChangeableData
     public bool Canf3 {get; set;}
     public WindowSettings WindowSettings {get; set;} = new WindowSettings();
     public string LightType {get; set;} = "Forward-Rendering-With-UBO";
+    public Scripts Scripts = new Scripts();
 }
 
 public class WindowSettings
@@ -177,4 +184,14 @@ public class WindowSettings
     public int Width {get; set;}
     public int LocationX {get; set;}
     public int LocationY {get; set;}
+}
+
+public class Scripts 
+{
+    public string ActiveBackend = "Csharp";
+    public string CsharpEntryNameSpace = "Unminal.Game";
+    public string LuaEntryFile = "scripts:/main.lua";
+    public string Drawer {get; set;} = "Csharp";
+    public string Updater {get; set;} = "Csharp";
+    public string Loader {get; set;} = "Csharp";
 }

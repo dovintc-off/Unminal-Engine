@@ -22,12 +22,17 @@
                 "ArgsExecuteMethod": null
             }
         },
-        "light":{
+        "light": {
             "ExecutedLayer": false,
             "display": {
                "ExecutedLayer": true,
                "executemethod": "ToggleLightDisplay" 
             }
+        },
+        "reload": {
+            "ExecutedLayer": true,
+            "ExecuteMethod": "ReloadScripts",
+            "ArgsExecuteMethod": null
         }
     }
 }

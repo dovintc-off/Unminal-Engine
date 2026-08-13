@@ -26,7 +26,11 @@ public static class CalledMethods {
             return false;
         }
 
-        Engine.Player.CameraObj?.FOV = MathHelper.DegreesToRadians(fov); 
+        if (Engine.Player.CameraObj != null)
+        {
+            Engine.Player.CameraObj.FOV = MathHelper.DegreesToRadians(fov);
+        }
+
         return true;
     }
 
@@ -45,7 +49,18 @@ public static class CalledMethods {
     }
 
     public static bool SayHello(Dictionary<string, object> args){
-        Console.CreateLog(Console.LogType.INFO, "Hello!");
+        Log.Create(Log.LogType.INFO, "Hello!");
+        return true;
+    }
+
+    public static bool ReloadScripts(Dictionary<string, object> args) {
+        // if (Engine.GameInstance is Main.Main main) {
+        //     main.ReloadScript();
+        //     return true;
+        // } else {
+        //     Console.CreateLog(Console.LogType.ERROR, "Cannot access Main instance for reloading.");
+        //     return false;
+        // }
         return true;
     }
 } 

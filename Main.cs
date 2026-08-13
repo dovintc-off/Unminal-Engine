@@ -17,6 +17,8 @@ public class Main : GameWindow {
     private ILightingPipeline? _lightingPipeline;
     private Dictionary<string, string> _debugTexts = new();
     private float _smoothFps = 60f;
+    private bool _isInitialLoadDone = false;
+    private int _loadStep = 0;
 #if DEBUG
 private PerformanceMonitor? _perfMonitor;
 #endif
@@ -37,7 +39,6 @@ private PerformanceMonitor? _perfMonitor;
 
     protected override void OnLoad() {
         base.OnLoad(); 
-
         gameConsole = new Console();
 
         if (Engine.ConfigManager != null) {
@@ -49,6 +50,11 @@ private PerformanceMonitor? _perfMonitor;
         GL.Enable(EnableCap.Blend); 
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
+        GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        var loadingTexture = Texture2D.GetOrCreateFileTexture(GetPath.GetCorrectPath("texture:/loading.png"));
+        loadingTexture.Draw2D(50f, 50f, Size.X, Size.Y);
+        Context.SwapBuffers();
 
         _textRenderer = new Text(
             GetPath.GetCorrectPath(Engine.Paths.Fonts.VCR_OSD_MONO),
@@ -61,10 +67,12 @@ private PerformanceMonitor? _perfMonitor;
             GetPath.GetCorrectPath("shader:/billboard.vert"), 
             GetPath.GetCorrectPath("shader:/billboard.frag")
         );
-
+        
+        Context.SwapBuffers();
         _model = Matrix4.Identity;
         _projection = Matrix4.CreatePerspectiveFieldOfView(_initialFov, Size.X / (float)Size.Y, 0.1f, 1000.0f);
 
+        Context.SwapBuffers();
         _lightManager = new LightManager();
 
         string lightType = Engine.ConfigManager?.GetConfig<string>("LightType") ?? "Forward-Rendering-With-UBO";
@@ -84,6 +92,7 @@ _perfMonitor = new PerformanceMonitor();
         Engine.LightManager = _lightManager;
         Engine.LightingPipeline = _lightingPipeline;
 
+        Context.SwapBuffers();
         _userGame.Load(_projection);
 
         _activeCameraRef = _userGame.ActiveCamera;
@@ -152,7 +161,7 @@ _perfMonitor = new PerformanceMonitor();
                 if (Engine.CanF3) {
                     Engine.GlobalWindowState.InDebugMenu = !Engine.GlobalWindowState.InDebugMenu;
                 } else {
-                    Console.CreateLog(Console.LogType.WARNING, "No permission to use the debug menu");
+                    Log.Create(Log.LogType.WARNING, "No permission to use the debug menu");
                 }
             }
 
@@ -184,25 +193,18 @@ _perfMonitor = new PerformanceMonitor();
 
     protected override void OnRenderFrame(FrameEventArgs e) {  
         base.OnRenderFrame(e);
-
         Engine.WindowSize = new Vector2i(Size.X, Size.Y);
         Engine.DeltaTime = (float)e.Time;
         Engine.TotalTime += e.Time;
 
         if (_activeCameraRef != null) {
             _projection = Matrix4.CreatePerspectiveFieldOfView(
-                _activeCameraRef.FOV,
-                Size.X / (float)Size.Y, 
-                0.1f, 
-                1000.0f
-            );
+                _activeCameraRef.FOV, Size.X / (float)Size.Y, 0.1f, 1000.0f);
         }
 
         GL.ClearColor(0, 0, 0, 1);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
         _lightingPipeline?.BeginFrame();
-
         _userGame.Draw();
 
         if (gameConsole != null && gameConsole.IsOpen) {
@@ -213,7 +215,7 @@ _perfMonitor = new PerformanceMonitor();
         Engine.Ortho = ortho;
         float currentFps = 1.0f / Engine.DeltaTime;
         _smoothFps = _smoothFps + (currentFps - _smoothFps) * 0.05f;
-        // Debug Menu
+        
         if (_textRenderer != null && Engine.GlobalWindowState.InDebugMenu && _activeCameraRef != null) {
             float TS = 20f;
             _debugTexts["name"] = $"Unminal V0.2.4-prerelease-2";
@@ -226,17 +228,15 @@ _perfMonitor = new PerformanceMonitor();
                 "Dir: {0:F1} {1:F1} {2:F1}", 
                 _activeCameraRef.Front.X, _activeCameraRef.Front.Y, _activeCameraRef.Front.Z);
             _debugTexts["pc-Resources"] = "PC resources: Telemetry Disabled";
-
 #if DEBUG
-if (_perfMonitor != null)
-    _debugTexts["pc-Resources"] = $"{_perfMonitor.GetMemory()} | {_perfMonitor.GetCPU()} | {_perfMonitor.GetGPU()}";
+            if (_perfMonitor != null)
+                _debugTexts["pc-Resources"] = $"{_perfMonitor.GetMemory()} | {_perfMonitor.GetCPU()} | {_perfMonitor.GetGPU()}";
 #endif
             _textRenderer.DrawString(_debugTexts["name"], 10, 5, TS, new Vector4(Colors.White, 1f), 2f);
             _textRenderer.DrawString(_debugTexts["fps"], 10, 30, TS, new Vector4(Colors.White, 1f), 1f); 
             _textRenderer.DrawString(_debugTexts["pos&fov"], 10, 55, TS, new Vector4(Colors.White, 1f), 1f);
             _textRenderer.DrawString(_debugTexts["direction"], 10, 80, TS, new Vector4(Colors.White, 1f), 1f); 
             _textRenderer.DrawString(_debugTexts["pc-Resources"], 10, 105, TS, new Vector4(Colors.White, 1f), 1f);
-
         }
         Context.SwapBuffers();
     }

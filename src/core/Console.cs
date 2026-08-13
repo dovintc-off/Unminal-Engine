@@ -2,7 +2,6 @@
 // Licensed under GNU AGPLv3 with No-Misattribution Addendum
 // See LICENSE file for details.
 namespace Unminal.Core.EngineConsole;
-using System.Runtime.CompilerServices;
 
 [SupportedOSPlatform("windows")]
 public class Console {
@@ -14,10 +13,6 @@ public class Console {
     private bool _wasToggleKeyPressed = false;
     private readonly string _pathToFileHistory = GetPath.GetCorrectPath(Engine.Paths.Config.ConsoleHistory);
     private KeyboardState? _prevInput;
-    private static string _prevlog = "";
-    public enum LogType {
-        ERROR, INFO, WARNING 
-    }
 
     Square _background = new Square(
         new Vector2(0, 0),
@@ -77,12 +72,12 @@ public class Console {
 
         if (!File.Exists(_pathToFileHistory))
         {
-            Console.CreateLog(Console.LogType.WARNING, "Cant read history file");
+            Log.Create(Log.LogType.WARNING, "Cant read history file");
             return new List<string>();
         } try {       
             return new List<string>(File.ReadAllLines(_pathToFileHistory));
         } catch (Exception e) {
-            Console.CreateLog(Console.LogType.WARNING, $"Cant read history file {e}");
+            Log.Create(Log.LogType.WARNING, $"Cant read history file {e}");
             return new List<string>();
         }
     }
@@ -91,7 +86,7 @@ public class Console {
         try {
             File.AppendAllText(_pathToFileHistory, command + Environment.NewLine);
         } catch (Exception e) {
-            Console.CreateLog(Console.LogType.ERROR, $"Error write command history: {e}");
+            Log.Create(Log.LogType.ERROR, $"Error write command history: {e}");
             
         }
     }   
@@ -115,39 +110,7 @@ public class Console {
             Vector3 vec3Color = Colors.VEC3toRGB(new Vector3(part.TextColor));
             System.Console.Write($"\x1b[38;2;{vec3Color[0]};{vec3Color[1]};{vec3Color[2]}m{part.Text}\x1b[0m");
         }
-         System.Console.Write("\x1b[0m");
-    }
-
-    public static void CreateLog(LogType Level, string LogText, bool CrashGame = false, string CrashError = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0){
-        LogToSystemConsole(Level, LogText, CrashGame, CrashError: CrashError, file: file, line: line);
-        LogToGameConsole(Level, LogText, CrashGame);
-    }
-
-    private static void LogToSystemConsole(LogType Level, string LogText, bool CrashGame = false, string CrashError = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0){
-        if (_prevlog == LogText) return;
-        _prevlog = LogText;
-
-        var (prefix, textcolor, resetcolor) = Level switch {
-            LogType.ERROR => ("[#red][ERROR] ", "[#crimson]", " [#darkgrey]"),
-            LogType.INFO =>  ("[#cornflowerblue][INFO] ", "[#white]", " [#darkgrey]"),
-            LogType.WARNING => ("[#yellow][WARNING] ", "[#gold]", " [#darkgrey]"),
-            _ => ("[#white][LOG]", "[#white]", "[#white]")
-        };
-
-        string calledFileName = Path.GetFileName(file);
-        string FinalLogText = $"{prefix}{textcolor}{LogText}{resetcolor}Called in {calledFileName}:{line}";
-
-        WriteLine(FinalLogText);
-        History.Add(FinalLogText);
-
-        if (CrashGame) {
-            string message = string.IsNullOrWhiteSpace(CrashError) ? "Game Crashed!" : $"Game Crashed: {CrashError}";
-            throw new Crash(message);
-        }
-    }
-
-    private static void LogToGameConsole(LogType Level, string LogText, bool CrashGame = false){
-        
+        System.Console.Write("\x1b[0m");
     }
 
     public void DrawConsole(int width, int height) {

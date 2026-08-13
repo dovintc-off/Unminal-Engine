@@ -43,3 +43,4 @@ global using Unminal.UI.Factory;
 global using Unminal.Utils.Colors;
 global using Unminal.Utils.GetPath;
 global using Unminal.Utils.ConfigManager;
+global using Unminal.Utils.Loging;
