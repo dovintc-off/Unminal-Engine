@@ -3,6 +3,8 @@
 // See LICENSE file for details.
 namespace Unminal.UI.ButtonRender;
 
+using Unminal.UI.ButtonEngine;
+
 [SupportedOSPlatform("windows")]
 public class RenderButton {
     private readonly Vector4 _normalColor;

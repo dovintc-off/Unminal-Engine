@@ -1,13 +1,12 @@
 // Unminal Engine - Copyright (C) 2026 Dov1ntc
 // Licensed under GNU AGPLv3 with No-Misattribution Addendum
 // See LICENSE file for details.
-using System.Runtime.InteropServices;
-
 namespace Unminal.Render.Light;
 
+using System.Runtime.InteropServices;
+
 [SupportedOSPlatform("windows")]
-public class LightManager : IDisposable
-{
+public class LightManager : IDisposable {
     public const int MaxLights = 1000; 
     public const int LightBlockBinding = 0; 
 
@@ -17,13 +16,11 @@ public class LightManager : IDisposable
 
     public IReadOnlyList<LightData> Lights => _lights;
 
-    public LightManager()
-    {
+    public LightManager() {
         InitializeUBO();
     }
 
-    private void InitializeUBO()
-    {
+    private void InitializeUBO() {
         _uboHandle = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.UniformBuffer, _uboHandle);
         
@@ -34,35 +31,28 @@ public class LightManager : IDisposable
         GL.BindBuffer(BufferTarget.UniformBuffer, 0);
     }
 
-    public void AddLight(LightData light)
-    {
-        if (_lights.Count >= MaxLights)
-        {
-            Console.CreateLog(Console.LogType.WARNING, $"Max lights limit ({MaxLights}) reached.");
+    public void AddLight(LightData light) {
+        if (_lights.Count >= MaxLights) {
+            Log.Create(Log.LogType.WARNING, $"Max lights limit ({MaxLights}) reached.");
             return;
         }
         _lights.Add(light);
         _isDirty = true;
     }
 
-    public void RemoveLight(LightData light)
-    {
+    public void RemoveLight(LightData light) {
         if (_lights.Remove(light)) _isDirty = true;
     }
 
-    public void ClearLights()
-    {
+    public void ClearLights() {
         _lights.Clear();
         _isDirty = true;
     }
 
-    public void UpdateGPUData()
-    {
+    public void UpdateGPUData() {
         bool anyLightDirty = false;
-        foreach (var light in _lights)
-        {
-            if (light.IsDirty)
-            {
+        foreach (var light in _lights) {
+            if (light.IsDirty) {
                 anyLightDirty = true;
                 break;
             }
@@ -73,8 +63,7 @@ public class LightManager : IDisposable
         GL.BindBuffer(BufferTarget.UniformBuffer, _uboHandle);
 
         GpuLight[] lightDataArray = new GpuLight[MaxLights];
-        for (int i = 0; i < _lights.Count; i++)
-        {
+        for (int i = 0; i < _lights.Count; i++) {
             lightDataArray[i] = _lights[i].Data;
             _lights[i].MarkClean();
         }
@@ -89,10 +78,8 @@ public class LightManager : IDisposable
         _isDirty = false;
     }
 
-    public void Dispose()
-    {
-        if (_uboHandle != 0)
-        {
+    public void Dispose() {
+        if (_uboHandle != 0) {
             GL.DeleteBuffer(_uboHandle);
             _uboHandle = 0;
         }

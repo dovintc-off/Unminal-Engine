@@ -3,6 +3,11 @@
 // See LICENSE file for details.
 namespace Unminal.UI.Factory;
 
+using Unminal.UI.ButtonRender;
+using Unminal.UI.ButtonObject;
+using Unminal.UI.ButtonEngine;
+using Unminal.Render.Primitive._2D;
+
 [SupportedOSPlatform("windows")]
 public static class UIFactory {
     private static uint _curID;

@@ -2,6 +2,7 @@
 // Licensed under GNU AGPLv3 with No-Misattribution Addendum
 // See LICENSE file for details.
 namespace Unminal.Script.Core;
+using Unminal.Core.PlayerCamera;
 
 [SupportedOSPlatform("windows")]
 public abstract class BaseGame {

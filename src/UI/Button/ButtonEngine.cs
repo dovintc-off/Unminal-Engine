@@ -3,6 +3,9 @@
 // See LICENSE file for details.
 namespace Unminal.UI.ButtonEngine;
 
+using Unminal.Render.Primitive._2D;
+using Unminal.UI.EventBus;
+
 [SupportedOSPlatform("windows")]
 public class EngineButton : IDisposable {
     public uint ID {get; init;}

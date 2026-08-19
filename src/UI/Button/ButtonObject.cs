@@ -3,6 +3,10 @@
 // See LICENSE file for details.
 namespace Unminal.UI.ButtonObject;
 
+using Unminal.Render.Primitive._2D;
+using Unminal.UI.ButtonRender;
+using Unminal.UI.ButtonEngine;
+
 [SupportedOSPlatform("windows")]
 public class Button : IDisposable {
     private readonly EngineButton logic;

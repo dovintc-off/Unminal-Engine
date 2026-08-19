@@ -3,8 +3,9 @@
 // See LICENSE file for details.
 namespace Unminal.Render.Light;
 
-public interface ILightingPipeline : IDisposable
-{
+using Unminal.Render.ShaderProgram;
+
+public interface ILightingPipeline : IDisposable {
     void Initialize();
     void BeginFrame();
     void ApplyLighting(Shader shader);

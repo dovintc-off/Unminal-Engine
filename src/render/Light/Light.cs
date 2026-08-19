@@ -10,8 +10,7 @@ namespace Unminal.Render.Light;
 /// The layout matches std140 alignment rules in GLSL (each vec3 + float = 16 bytes).
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
-public struct GpuLight
-{
+public struct GpuLight {
     public Vector3 Position;
     public float Constant;   // Attenuation constant factor
 
@@ -21,8 +20,7 @@ public struct GpuLight
     public Vector3 Ambient;
     public float Quadratic;  // Attenuation quadratic factor
 
-    public GpuLight(Vector3 position, Vector3 color, float intensity = 1.0f)
-    {
+    public GpuLight(Vector3 position, Vector3 color, float intensity = 1.0f) {
         Position = position;
         Color = color * intensity;
         
@@ -44,21 +42,17 @@ public class LightData {
     
     public bool IsDirty { get; private set; } = true;
 
-    public Vector3 Position 
-    { 
+    public Vector3 Position { 
         get => _data.Position; 
-        set 
-        { 
+        set { 
             _data.Position = value; 
             IsDirty = true; 
         } 
     }
     
-    public Vector3 Color 
-    { 
+    public Vector3 Color { 
         get => _data.Color; 
-        set 
-        { 
+        set {
             _data.Color = value; 
             IsDirty = true; 
         } 
@@ -66,8 +60,7 @@ public class LightData {
 
     public GpuLight Data => _data;
 
-    public LightData(Vector3 position, Vector3 color, float intensity = 1.0f)
-    {
+    public LightData(Vector3 position, Vector3 color, float intensity = 1.0f) {
         _data = new GpuLight(position, color, intensity);
     }
 
