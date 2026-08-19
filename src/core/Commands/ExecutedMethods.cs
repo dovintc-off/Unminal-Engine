@@ -58,7 +58,7 @@ public static class CalledMethods {
         //     main.ReloadScript();
         //     return true;
         // } else {
-        //     Console.CreateLog(Console.LogType.ERROR, "Cannot access Main instance for reloading.");
+        //     Log.Create(Log.LogType.ERROR, "Cannot access Main instance for reloading.");
         //     return false;
         // }
         return true;

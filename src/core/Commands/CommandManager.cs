@@ -2,14 +2,19 @@
 // Licensed under GNU AGPLv3 with No-Misattribution Addendum
 // See LICENSE file for details.
 namespace Unminal.Core.Commands.Manager;
+
 using System.Text.Json.Nodes;
+using Unminal.Core.Commands.Structure;
+using Unminal.Core.Commands.CommandParser;
+
 [SupportedOSPlatform("windows")]
 public static class CommandManager {
     public static List<Command>? Commands = new List<Command>();
     public static JsonNode? json;
 
     public static void LoadCommands() {
-        json = ParserCommands.InitParser(GetPath.GetCorrectPath(Engine.Paths.Config.CommandConfig));
+        Log.Create(Log.LogType.WARNING, "The command system using CommandExecutorConfig.json file will be removed soon. And its support has already been suspended.");
+        json = ParserCommands.InitParser(GetPath.GetCorrectPath(Engine.Paths.Config.CommandConfig, true));
         Commands = ParserCommands.Parse(json, Commands!);
     }
 

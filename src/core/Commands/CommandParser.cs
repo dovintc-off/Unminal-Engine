@@ -4,6 +4,7 @@
 namespace Unminal.Core.Commands.CommandParser;
 
 using System.Text.Json.Nodes;
+using Unminal.Core.Commands.Structure;
 
 [SupportedOSPlatform("windows")]
 public static class ParserCommands {
@@ -13,11 +14,11 @@ public static class ParserCommands {
                 string jsonText = File.ReadAllText(path);
                 return JsonNode.Parse(jsonText);
             } catch (Exception ex) {
-                Console.CreateLog(Console.LogType.ERROR, $"JSON write error: {ex.Message}");
+                Log.Create(Log.LogType.ERROR, $"JSON write error: {ex.Message}");
                 throw new Exception();
             }
         } else { 
-            Console.CreateLog(Console.LogType.ERROR, $"File not found: {path}");
+            Log.Create(Log.LogType.ERROR, $"File not found: {path}");
             throw new Exception();
         }
     }

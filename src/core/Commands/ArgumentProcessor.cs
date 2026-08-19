@@ -3,6 +3,8 @@
 // See LICENSE file for details.
 namespace Unminal.Core.Commands.Processor;
 
+using Unminal.Core.Commands.Structure;
+
 [SupportedOSPlatform("windows")]
 public static class ArgumentProcessor {
     public static Dictionary<string, object> Process(Command command, List<string> userTokens) {
@@ -12,7 +14,7 @@ public static class ArgumentProcessor {
             .ToList();
 
         if (userTokens.Count > expectedParams.Count) {
-            Console.CreateLog(Console.LogType.WARNING, $"Too many arguments. Expected {expectedParams.Count}, got {userTokens.Count}.");
+            Log.Create(Log.LogType.WARNING, $"Too many arguments. Expected {expectedParams.Count}, got {userTokens.Count}.");
             return finalArgs;
         }
 
@@ -22,7 +24,7 @@ public static class ArgumentProcessor {
             var parts = rawValue.Split('?', 2);
             
             if (parts.Length < 2) {
-                Console.CreateLog(Console.LogType.WARNING, $"[#red]Config Error: Missing '?' in '{argName}'.");
+                Log.Create(Log.LogType.WARNING, $"[#red]Config Error: Missing '?' in '{argName}'.");
                 continue;
             }
 
@@ -59,11 +61,11 @@ public static class ArgumentProcessor {
         foreach (var rule in rules.Split('|')) {
             string r = rule.Trim();
             if (r.StartsWith("type:int") && !int.TryParse(value, out _)) {
-                Console.CreateLog(Console.LogType.WARNING, $"Type Error: '{argName}' must be integer."); return false;
+                Log.Create(Log.LogType.WARNING, $"Type Error: '{argName}' must be integer."); return false;
             } else if (r.StartsWith("type:bool")) {
                 string lowerVal = value.ToLowerInvariant();
                 if (lowerVal != "true" && lowerVal != "false" && lowerVal != "1" && lowerVal != "0") {
-                    Console.CreateLog(Console.LogType.WARNING, $"Type Error: '{argName}' must be boolean."); return false;
+                    Log.Create(Log.LogType.WARNING, $"Type Error: '{argName}' must be boolean."); return false;
                 }
             }
         }
@@ -79,10 +81,11 @@ public static class ArgumentProcessor {
                 if (sIdx > 0 && eIdx > sIdx) {
                     var limits = r[sIdx..eIdx].Split(',');
                     if (limits.Length == 2 && int.TryParse(limits[0], out int min) && int.TryParse(limits[1], out int max)) {
-                        if (!Command.range(min, max, value)) {
-                            Console.CreateLog(Console.LogType.WARNING, $"Range Error: '{argName}' is out of bounds [{min}-{max}].");
-                            return false;
-                        }
+                        Log.Create(Log.LogType.WARNING, "Range is unsuported");
+                        // if (!Command.range(min, max, value)) {
+                        //     Log.Create(Log.LogType.WARNING, $"Range Error: '{argName}' is out of bounds [{min}-{max}].");
+                        //     return false;
+                        // }
                     }
                 }
             }
@@ -92,19 +95,21 @@ public static class ArgumentProcessor {
 
     private static object? HandleDefaultLogic(string logic, string argName) {
         if (logic.StartsWith("error(")) {
-            int s = logic.IndexOf('(') + 1;
-            int e = logic.LastIndexOf(')');
-            Console.CreateLog(Console.LogType.WARNING, $"{(s > 0 && e > s ? logic[s..e] : "Missing argument")}");
-            return null;
+            Log.Create(Log.LogType.WARNING, "Error is unsuported");
+            // int s = logic.IndexOf('(') + 1;
+            // int e = logic.LastIndexOf(')');
+            // Log.Create(Log.LogType.WARNING, $"{(s > 0 && e > s ? logic[s..e] : "Missing argument")}");
+            // return null;
         } else if (logic.StartsWith("get(")) {
-            int s = logic.IndexOf('(') + 1;
-            int e = logic.LastIndexOf(')');
-            if (s > 0 && e > s) {
-                string path = logic[s..e];
-                var val = Command.get(typeof(Engine), path);
-                if (val == null) Console.CreateLog(Console.LogType.WARNING, $"Path '{path}' returned null.");
-                return val;
-            }
+            Log.Create(Log.LogType.WARNING, "Get is unsuported");
+            // int s = logic.IndexOf('(') + 1;
+            // int e = logic.LastIndexOf(')');
+            // if (s > 0 && e > s) {
+            //     string path = logic[s..e];
+            //     var val = Command.get(typeof(Engine), path);
+            //     if (val == null) Log.Create(Log.LogType.WARNING, $"Path '{path}' returned null.");
+            //     return val;
+            // }
         }
         return logic;
     }

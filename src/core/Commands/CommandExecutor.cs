@@ -4,6 +4,11 @@
 namespace Unminal.Core.Commands.Executor;
 using System.Reflection;
 
+using Unminal.Core.Commands.Structure;
+using Unminal.Core.Commands.ExecutedMethods;
+using Unminal.Core.Commands.Processor;
+using Unminal.Core.Commands.Tokenizer;
+
 [SupportedOSPlatform("windows")]
 public static class CommandExecutor {
     public static void Execute(string Excommand) {
@@ -16,7 +21,7 @@ public static class CommandExecutor {
             string.Equals(c.Name, tokens[0], StringComparison.OrdinalIgnoreCase));
 
         if (current == null) { 
-            Console.CreateLog(Console.LogType.WARNING, $"Unknown root command: {tokens[0]}"); 
+            Log.Create(Log.LogType.WARNING, $"Unknown root command: {tokens[0]}"); 
             return; 
         }
 
@@ -37,13 +42,13 @@ public static class CommandExecutor {
         }
 
         if (!commandFound) {
-            Console.CreateLog(Console.LogType.WARNING, $"Unknown subcommand '{tokens[i]}' for '{current.Name}'. Available: {string.Join(", ", current.Layer.Select(c => c.Name))}");
+            Log.Create(Log.LogType.WARNING, $"Unknown subcommand '{tokens[i]}' for '{current.Name}'. Available: {string.Join(", ", current.Layer.Select(c => c.Name))}");
             return;
         }
 
         if (!current.ExecutedLayer) {
             var subs = current.Layer.Select(c => c.Name);
-            Console.CreateLog(Console.LogType.INFO, $"'{current.Name}' requires action. Available: {string.Join(", ", subs)}");
+            Log.Create(Log.LogType.INFO, $"'{current.Name}' requires action. Available: {string.Join(", ", subs)}");
             return;
         }
 
@@ -72,12 +77,12 @@ public static class CommandExecutor {
         if (method != null) {
             bool result = (method.Invoke(null, new object[] { finalArgs }) as bool?) ?? false;
             if (!result) {
-                Console.CreateLog(Console.LogType.ERROR, $"Something went wrong with executing method: \"{current.Name}\"");
+                Log.Create(Log.LogType.ERROR, $"Something went wrong with executing method: \"{current.Name}\"");
             } else {
-                Console.CreateLog(Console.LogType.INFO, "Command Executed");
+                Log.Create(Log.LogType.INFO, "Command Executed");
             }
         } else {
-            Console.CreateLog(Console.LogType.ERROR, $"Method \"{current.ExecuteMethod}\" not found");
+            Log.Create(Log.LogType.ERROR, $"Method \"{current.ExecuteMethod}\" not found");
         }
     }   
 }
