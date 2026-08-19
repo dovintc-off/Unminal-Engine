@@ -4,22 +4,21 @@
 // Im take this code with another my project "SyncraRPC"
 // now these two projects are running on the same config system
 // im chnge it but this is soo cool))) 
+namespace Unminal.Utils.ConfigManager;
 
 using System.Text.Json;
 using System.ComponentModel;
 
-namespace Unminal.Utils.ConfigManager;
-
 [SupportedOSPlatform("windows")]
 public class Config {
-    string fileConfig = GetPath.GetPath.GetCorrectPath(Engine.Paths.Config.MainConfig);
+    string fileConfig = GetPath.GetPath.GetCorrectPath(Engine.Paths.Config.MainConfig, true);
 
     public Config(string FileConfig = "") {
         if (!(FileConfig == "")) this.fileConfig = FileConfig;
         JsonRoot conf = ReadConfig(this.fileConfig);
     }
 
-    public T ConvertTo<T>(object input) {
+    public static T ConvertTo<T>(object input) {
         if (input == null || input == DBNull.Value) throw new Exception("[#red][ERROR] Value is null");;
         try {
             Type targetType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
@@ -50,66 +49,60 @@ public class Config {
         string? newLocationX = null,
         string? newLocationY = null,
         string? newLightType = null,
-        string? newCanf3 = null
+        string? newCanf3 = null,
+        string? newShowLights = null,
+        string? newLanguage = null
     )
     {
         JsonRoot config = ReadConfig(this.fileConfig);
         if (config.Changeable == null) config.Changeable = new ChangeableData();
-        if (config.Changeable.WindowSettings == null) config.Changeable.WindowSettings = new WindowSettings();
-        config.Changeable.Title = newTitle ?? this.GetConfig<string>("Title") ?? "Title";
-        config.Changeable.Debug = newDebug != null
-            ? ConvertTo<bool>(newDebug)
-            : this.GetConfig<bool>("Debug");
-        config.Changeable.WindowSettings.Height = newHeight != null
-            ? ConvertTo<int>(newHeight)
-            : this.GetConfig<int>("Height");
-        config.Changeable.WindowSettings.Width = newWidth != null
-            ? ConvertTo<int>(newWidth)
-            : this.GetConfig<int>("Width");
-        config.Changeable.WindowSettings.VSync = newVSync != null
-            ? ConvertTo<bool>(newVSync)
-            : this.GetConfig<bool>("VSync");
-        config.Changeable.WindowSettings.LocationX = newLocationX != null
-            ? ConvertTo<int>(newLocationX)
-            : this.GetConfig<int>("LocationX");
-        config.Changeable.WindowSettings.LocationY = newLocationY != null
-            ? ConvertTo<int>(newLocationY)
-            : this.GetConfig<int>("LocationY");
-        config.Changeable.LightType = newLightType != null
-            ? newLightType.ToString()
-            : this.GetConfig<string>("LightType");
-        config.Changeable.Canf3 = newCanf3 != null
-            ? ConvertTo<bool>(newCanf3)
-            : this.GetConfig<bool>("Canf3");
+        if (config.Changeable.EngineSettings.WindowSettings == null) config.Changeable.EngineSettings.WindowSettings = new WindowSettings();
+
+        config.Changeable.Graphics.LightType = newLightType != null
+            ? newLightType.ToString() : this.GetConfig<string>("LightType");
+        config.Changeable.EngineSettings.Debug = newDebug != null
+            ? ConvertTo<bool>(newDebug) : this.GetConfig<bool>("Debug");
+        config.Changeable.EngineSettings.Canf3 = newCanf3 != null
+            ? ConvertTo<bool>(newCanf3) : this.GetConfig<bool>("Canf3");
+        config.Changeable.EngineSettings.ShowLights = newShowLights != null
+            ? ConvertTo<bool>(newShowLights) : this.GetConfig<bool>("ShowLights");
+        config.Changeable.EngineSettings.Language = newLanguage != null
+            ? ConvertTo<string>(newLanguage) : this.GetConfig<string>("Language");
+        config.Changeable.EngineSettings.WindowSettings.VSync = newVSync != null
+            ? ConvertTo<bool>(newVSync) : this.GetConfig<bool>("VSync");
+        config.Changeable.EngineSettings.WindowSettings.Height = newHeight != null
+            ? ConvertTo<int>(newHeight) : this.GetConfig<int>("Height");
+        config.Changeable.EngineSettings.WindowSettings.Width = newWidth != null
+            ? ConvertTo<int>(newWidth) : this.GetConfig<int>("Width");
+        config.Changeable.EngineSettings.WindowSettings.Title = newTitle 
+            ?? this.GetConfig<string>("Title") ?? "Title";
+        config.Changeable.EngineSettings.WindowSettings.LocationX = newLocationX != null
+            ? ConvertTo<int>(newLocationX) : this.GetConfig<int>("LocationX");
+        config.Changeable.EngineSettings.WindowSettings.LocationY = newLocationY != null
+            ? ConvertTo<int>(newLocationY) : this.GetConfig<int>("LocationY");
 
         SaveToFile(config);
     }
 
-    public T GetConfig<T>(string key)
-    {
+    public T GetConfig<T>(string key) {
         JsonRoot config = ReadConfig(this.fileConfig);
-        if (config.Changeable == null) {throw new JsonException("[#red]in Config.cs null object");}
-        if (config.Changeable.WindowSettings == null){throw new JsonException("[#red]in Config.cs null object");}
+        if (config.Changeable == null) {throw new JsonException($"[#red]in Config.cs null object {fileConfig}");}
+        if (config.Changeable.EngineSettings.WindowSettings == null){throw new JsonException("[#red]in Config.cs null object");}
 
         object val = key switch {
-            "Title" => config.Changeable.Title,
-            "Debug" => config.Changeable.Debug,
-            "Height" => config.Changeable.WindowSettings.Height,
-            "Width" => config.Changeable.WindowSettings.Width,
-            "VSync" => config.Changeable.WindowSettings.VSync,
-            "LocationX" => config.Changeable.WindowSettings.LocationX,
-            "LocationY" => config.Changeable.WindowSettings.LocationY,
-            "LightType" => config.Changeable.LightType,
-            "Canf3" => config.Changeable.Canf3,
-            "ActiveBackend" => config.Changeable.Scripts.ActiveBackend,
-            "LuaEntryFile" => config.Changeable.Scripts.LuaEntryFile,
-            "CsharpEntryNameSpace" => config.Changeable.Scripts.CsharpEntryNameSpace,
-            "ScriptDrawer" => config.Changeable.Scripts.Drawer,
-            "ScriptLoader" => config.Changeable.Scripts.Loader,
-            "ScriptUpdater" => config.Changeable.Scripts.Updater,
+            "LightType" => config.Changeable.Graphics.LightType,
+            "Debug" => config.Changeable.EngineSettings.Debug,
+            "Canf3" => config.Changeable.EngineSettings.Canf3,
+            "ShowLights" => config.Changeable.EngineSettings.ShowLights,
+            "Language" => config.Changeable.EngineSettings.Language,
+            "VSync" => config.Changeable.EngineSettings.WindowSettings.VSync,
+            "Height" => config.Changeable.EngineSettings.WindowSettings.Height,
+            "Width" => config.Changeable.EngineSettings.WindowSettings.Width,
+            "Title" => config.Changeable.EngineSettings.WindowSettings.Title,
+            "LocationX" => config.Changeable.EngineSettings.WindowSettings.LocationX,
+            "LocationY" => config.Changeable.EngineSettings.WindowSettings.LocationY,
             _ => throw new Exception($"{key} not found in config")
         };
-
         return To<T>(val);
     }
 
@@ -160,38 +153,45 @@ public class Config {
 }
 
 // Config structure
-public class JsonRoot
-{
+public class JsonRoot {
     public ChangeableData? Changeable {get; set;}
     [System.Text.Json.Serialization.JsonPropertyName("User-defined")]
     public Dictionary<string, object>? UserDefined {get; set;}
 }
 
-public class ChangeableData
-{
-    public string Title {get; set;} = "Title";
-    public bool Debug {get; set;}
-    public bool Canf3 {get; set;}
-    public WindowSettings WindowSettings {get; set;} = new WindowSettings();
-    public string LightType {get; set;} = "Forward-Rendering-With-UBO";
-    public Scripts Scripts = new Scripts();
+public class ChangeableData {
+    public Graphics Graphics {get; set;}= new Graphics();
+    public EngineSettings EngineSettings {get; set;} = new EngineSettings();
 }
 
-public class WindowSettings
-{
+public class Graphics {
+    public string LightType {get; set;} = "Forward-Rendering-With-UBO";
+}
+
+public class EngineSettings {
+    public bool Debug {get; set;}
+    public bool Canf3 {get; set;}
+    public bool ShowLights {get; set;}
+    public string Language {get; set;} = "EN";
+    public WindowSettings WindowSettings {get; set;} = new WindowSettings();
+}
+
+public class WindowSettings {
     public bool VSync {get; set;}
     public int Height {get; set;}
     public int Width {get; set;}
+    public string Title {get; set;} = "Game on Unminal Engine";
     public int LocationX {get; set;}
     public int LocationY {get; set;}
 }
 
-public class Scripts 
-{
-    public string ActiveBackend = "Csharp";
-    public string CsharpEntryNameSpace = "Unminal.Game";
-    public string LuaEntryFile = "scripts:/main.lua";
-    public string Drawer {get; set;} = "Csharp";
-    public string Updater {get; set;} = "Csharp";
-    public string Loader {get; set;} = "Csharp";
+public class Extension {
+    string? Name {get; set;}
+    string? Path {get; set;}
+}
+
+public class ExtensionSetting {
+    string? Name {get; set;}
+    string? Namespace {get; set;}
+    object? values {get; set;}
 }

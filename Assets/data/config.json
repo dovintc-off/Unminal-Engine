@@ -1,23 +1,22 @@
 {
-    "Changeable": {
-        "Title": "Unminal Engine",
-        "Debug": true,
-        "Canf3": true,
-        "WindowSettings": {
-            "VSync": true,
-            "Height": 900,
-            "Width": 1300
-        },
-        "LightType": "Forward-Rendering-With-UBO",
-        "Scripts": {
-            "ActiveBackend": "CSharp",
-            "Drawer": "Lua",
-            "Updater": "Lua",
-            "Loader": "CSharp",
-            "LuaDialect": "ULD",
-            "LuaPath": "scripts:/main.uld",
-            "CsharpEntryNameSpace": "Dov1ntc.My3DGame.Logic"
-        }
+  "Changeable": {
+    "Graphics": {
+      "LightType": "Forward-Rendering-With-UBO"
     },
-    "User-defined": null
+    "EngineSettings": {
+      "Debug": true,
+      "Canf3": true,
+      "ShowLights": false,
+      "Language": "EN",
+      "WindowSettings": {
+        "VSync": true,
+        "Height": 978,
+        "Width": 1332,
+        "Title": "Game on Unminal Engine2",
+        "LocationX": 0,
+        "LocationY": 0
+      }
+    }
+  },
+  "User-defined": null
 }
