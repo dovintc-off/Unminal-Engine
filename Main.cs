@@ -4,10 +4,17 @@
 namespace Unminal.Main;
 
 using Unminal.Utils.Diagnostics;
+using Unminal.Core.Scripting.Script;
+using Unminal.Core.PlayerCamera;
+using Unminal.Render.Texture;
+using Unminal.Render.Light;
+using Unminal.Render.Billboards;
+using Unminal.UI.TextRender.TextRenderer;
+using Unminal.Utils.Colors;
 
 [SupportedOSPlatform("windows")]
 public class Main : GameWindow {
-    private readonly BaseGame _userGame;
+    private readonly Script _userGame;
     Matrix4 _model, _view, _projection;
     float _initialFov = MathHelper.PiOver4;
     private Text? _textRenderer;
@@ -17,13 +24,11 @@ public class Main : GameWindow {
     private ILightingPipeline? _lightingPipeline;
     private Dictionary<string, string> _debugTexts = new();
     private float _smoothFps = 60f;
-    private bool _isInitialLoadDone = false;
-    private int _loadStep = 0;
 #if DEBUG
 private PerformanceMonitor? _perfMonitor;
 #endif
-    public Main(BaseGame userGame) : base(
-            new GameWindowSettings() { UpdateFrequency = 0 }, 
+    public Main(Script userGame) : base(
+            new GameWindowSettings() { UpdateFrequency = 60 }, 
             new NativeWindowSettings(){ 
                 Location =  new Vector2i(Engine.ConfigManager.GetConfig<int>("LocationX"), Engine.ConfigManager.GetConfig<int>("LocationY")),
                 ClientSize = new Vector2i(Engine.ConfigManager.GetConfig<int>("Width"), Engine.ConfigManager.GetConfig<int>("Height")),
@@ -52,20 +57,20 @@ private PerformanceMonitor? _perfMonitor;
 
         GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-        var loadingTexture = Texture2D.GetOrCreateFileTexture(GetPath.GetCorrectPath("texture:/loading.png"));
+        var loadingTexture = Texture2D.GetOrCreateFileTexture(GetPath.GetCorrectPath("/Assets/textures/loading.png", true));
         loadingTexture.Draw2D(50f, 50f, Size.X, Size.Y);
         Context.SwapBuffers();
 
         _textRenderer = new Text(
-            GetPath.GetCorrectPath(Engine.Paths.Fonts.VCR_OSD_MONO),
+            GetPath.GetCorrectPath(Engine.Paths.Fonts.VCR_OSD_MONO, true),
             256,
-            GetPath.GetCorrectPath(Engine.Paths.Shaders.textV),
-            GetPath.GetCorrectPath(Engine.Paths.Shaders.textF)
+            GetPath.GetCorrectPath(Engine.Paths.Shaders.textV, true),
+            GetPath.GetCorrectPath(Engine.Paths.Shaders.textF, true)
         );
 
         Billboard.Initialize(
-            GetPath.GetCorrectPath("shader:/billboard.vert"), 
-            GetPath.GetCorrectPath("shader:/billboard.frag")
+            GetPath.GetCorrectPath("Assets/shaders/billboard.vert", true), 
+            GetPath.GetCorrectPath("Assets/shaders/billboard.frag", true)
         );
         
         Context.SwapBuffers();
@@ -156,6 +161,7 @@ _perfMonitor = new PerformanceMonitor();
         // Console open/close
         if (gameConsole != null && gameConsole.IsOpen) {
             CursorState = CursorState.Normal;
+            Core.Input.Mouse.Cursor.CursorSetCrosshair();
         } else {
             if (input.IsKeyReleased(Keys.F3)) { 
                 if (Engine.CanF3) {
@@ -276,5 +282,14 @@ _perfMonitor!.Dispose();
                 _projection = Matrix4.CreatePerspectiveFieldOfView(_activeCameraRef.FOV, Size.X / (float)Size.Y, 0.1f, 100.0f);
             }
         } 
+    }
+}
+
+public static class TypeExtensions {
+    public static object? GetDefaultValue(this Type type) {
+        if (type == typeof(string)) return string.Empty;
+        if (type.IsValueType) return Activator.CreateInstance(type);
+        if (type == typeof(bool)) return false;
+        return null;
     }
 }
