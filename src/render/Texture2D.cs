@@ -27,8 +27,8 @@ public class Texture2D : IDisposable {
     private static void InitializeUiRenderer() {
         if (_isUiInitialized) return;
 
-        string vertPath = GetPath.GetCorrectPath("shader:/ui2d.vert");
-        string fragPath = GetPath.GetCorrectPath("shader:/ui2d.frag");
+        string vertPath = GetPath.GetCorrectPath("Assets/shaders/ui2d.vert", true);
+        string fragPath = GetPath.GetCorrectPath("Assets/shaders/ui2d.frag", true);
 
         if (!File.Exists(vertPath) || !File.Exists(fragPath)) {
             throw new FileNotFoundException("[Unminal UI] Файлы шейдеров ui2d.vert или ui2d.frag не найдены!");

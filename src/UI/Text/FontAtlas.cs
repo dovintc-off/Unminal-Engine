@@ -5,6 +5,7 @@
 namespace Unminal.UI.TextRender.FontAtlas;
 
 using System.Collections.Concurrent;
+using Unminal.UI.TextRender.Glyph;
 
 [SupportedOSPlatform("windows")]
 public class Atlas : IDisposable
@@ -28,7 +29,7 @@ public class Atlas : IDisposable
         var family = pfc.Families[0];
 
         using var bitmap = new Bitmap(Width, Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-        using var graphics = Graphics.FromImage(bitmap);
+        using var graphics = System.Drawing.Graphics.FromImage(bitmap);
 
         // graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
         
@@ -61,7 +62,7 @@ public class Atlas : IDisposable
             
             if (currentY + hPixels > Height)
             {
-                Console.CreateLog(Console.LogType.WARNING, $"Font atlas overflow! Symbol: '{c}'");
+                Log.Create(Log.LogType.WARNING, $"Font atlas overflow! Symbol: '{c}'");
                 break;
             }
 
@@ -87,8 +88,9 @@ public class Atlas : IDisposable
             Directory.CreateDirectory(dirName);
         }
         bitmap.Save(outputPath, ImageFormat.Png);
-        Console.CreateLog(Console.LogType.INFO, $"Font atlas saved to: {outputPath}");
-
+#if DEBUG
+        Log.Create(Log.LogType.INFO, $"Font atlas saved to: {outputPath}");
+#endif
         LoadTextureToOpenGL(bitmap);
     }
 

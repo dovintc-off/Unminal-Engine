@@ -1,10 +1,23 @@
-namespace Unminal.Script;
+namespace Dov1ntc.MyGameIn3d;
 
+using static Dov1ntc.MyGameIn3d.Scene;
+using Unminal.Core.Scripting.Script;
+using Unminal.Core.Scripting.Utils;
+using Unminal.Core.Commands.Structure;
+using Unminal.Core.State;
+using Unminal.Core.PlayerCamera;
 using Unminal.Core.Commands.Manager;
-using static Unminal.Script.Scene;
+using Unminal.Render.Light;
+using Unminal.Render.Objects;
+using Unminal.Render.SkyBox;
+using Unminal.Render.Billboards;
+using Unminal.UI.TextRender.TextRenderer;
+using Unminal.UI.EventBus;
+using Unminal.Utils.Colors;
 
 [SupportedOSPlatform("windows")]
-public class MyGame : BaseGame {
+[Script]
+public class Game : Script {
     private List<GameObject> _objects = new List<GameObject>();
     private Skybox? skybox;
     private Text? _textRenderer;
@@ -20,18 +33,21 @@ public class MyGame : BaseGame {
         Engine.LightManager?.ClearLights();
         Engine.LightManager?.AddLight(new LightData(new Vector3(0, 0, 0), Colors.White, 30f));
 
-        _textRenderer = new Text("font:/PFAgoraSlabPro-Bold.ttf", 256);
+        _textRenderer = new Text("Assets/fonts/PFAgoraSlabPro-Bold.ttf", 256);
 
         skybox = new Skybox(Engine.Paths.BaseSkyBoxAssets);
 
         CommandManager.AddCommand("debug", new Command(){Name = "SayHello", Layer = null!, ExecuteMethod = "SayHello", ExecutedLayer = true});
+        CommandManager.AddCommand("debug", new Command(){Name = "Server", Layer = null!, ExecutedLayer = false});
+        CommandManager.AddCommand("Server", new Command(){Name = "Open", Layer = null!, ExecuteMethod = "ServerOpen", ExecutedLayer = true});
+        CommandManager.AddCommand("Server", new Command(){Name = "Conect", Layer = null!, ExecuteMethod = "ServerConect", ExecutedLayer = true});
     }
 
     public void OnBtnPress(ButtonPressedEvent e) =>
         Console.WriteLine($"\n[#blue]Button Pressed on {e.ButtonId}");
 
     public void OnBtnHeld(ButtonHeldEvent e) =>
-        Console.Write($"\rDuration Held: {e.Duration:F3} on {e.ButtonId}");
+        Console.Write($"\rDuration Held: {e.Duration:F3} on {e.ButtonId}");  
 
     public void OnBtnReleased(ButtonRelesedEvent e) => 
         Console.WriteLine($"\n[#blue]Button Released on {e.ButtonId}");
@@ -58,7 +74,8 @@ public class MyGame : BaseGame {
 
         new Billboard()
             .Position(new Vector3(15, 8, -40)).Scale(new Vector2(8.0f, 5.0f))
-            .Texture("texture:/cat.png").Draw();
+            .Texture("Assets/textures/cat.png").Draw();
+
         if (Console.Instance!.IsOpen) {
             Scene.btn1?.Draw();
             _textRenderer!.DrawString("Hello!", 200, 200, 20, new Vector4(1, 1, 1, 1));

@@ -4,24 +4,20 @@
 // ObjLoader.cs
 namespace Unminal.Core.ObjLoader;
 
-public class ObjModel
-{
+public class ObjModel {
     public required float[] Vertices { get; set; }
     public required uint[] Indices { get; set; }
 }
 
 [SupportedOSPlatform("windows")]
-public static class ObjLoader
-{
-    public static ObjModel Load(string path)
-    {
+public static class ObjLoader {
+    public static ObjModel Load(string path) {
         var positions = new List<Vector3>();
         var indices = new List<uint>();
 
         string[] lines = File.ReadAllLines(path);
 
-        foreach (string line in lines)
-        {
+        foreach (string line in lines) {
             if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
                 continue;
 
@@ -31,16 +27,13 @@ public static class ObjLoader
 
             string type = tokens[0];
 
-            if (type == "v")
-            {
+            if (type == "v") {
                 float x = float.Parse(tokens[1], System.Globalization.CultureInfo.InvariantCulture);
                 float y = float.Parse(tokens[2], System.Globalization.CultureInfo.InvariantCulture);
                 float z = float.Parse(tokens[3], System.Globalization.CultureInfo.InvariantCulture);
                 
                 positions.Add(new Vector3(x, y, z));
-            }
-            else if (type == "f")
-            {
+            } else if (type == "f") {
                 
                 int[] faceIndices = new int[tokens.Length - 1];
                 
@@ -67,8 +60,7 @@ public static class ObjLoader
         }
 
         Vector3[] calculateNormals = new Vector3[positions.Count];
-        for (int i = 0; i < indices.Count; i += 3)
-        {
+        for (int i = 0; i < indices.Count; i += 3) {
             int idx0 = (int)indices[i];
             int idx1 = (int)indices[i + 1];
             int idx2 = (int)indices[i + 2];
@@ -87,16 +79,13 @@ public static class ObjLoader
             calculateNormals[idx2] += normal;
         }
 
-        for (int i = 0; i < calculateNormals.Length; i++)
-        {
-            if (calculateNormals[i].Length > 0)
-                calculateNormals[i] = Vector3.Normalize(calculateNormals[i]);
+        for (int i = 0; i < calculateNormals.Length; i++) {
+            if (calculateNormals[i].Length > 0) calculateNormals[i] = Vector3.Normalize(calculateNormals[i]);
         }
 
         float[] verticesArray = new float[positions.Count * 6];
 
-        for (int i = 0; i < positions.Count; i++)
-        {
+        for (int i = 0; i < positions.Count; i++) {
             verticesArray[i * 6]     = positions[i].X;
             verticesArray[i * 6 + 1] = positions[i].Y;
             verticesArray[i * 6 + 2] = positions[i].Z;
@@ -106,8 +95,7 @@ public static class ObjLoader
             verticesArray[i * 6 + 5] = calculateNormals[i].Z;
         }
 
-        return new ObjModel
-        {
+        return new ObjModel {
             Vertices = verticesArray,
             Indices = indices.ToArray()
         };

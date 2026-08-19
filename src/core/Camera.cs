@@ -11,8 +11,7 @@ public class Camera {
     public float Pitch { get; set; }
     public float[] limitationFOV {get; set;} = {30.0f, 120.0f};
     private float _fov = MathHelper.PiOver4;
-    public float FOV
-    { 
+    public float FOV { 
         get => _fov; 
         set 
         {

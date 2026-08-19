@@ -3,6 +3,11 @@
 // See LICENSE file for details.
 namespace Unminal.Core.EngineConsole;
 
+using Unminal.Core.Commands.Executor;
+using Unminal.Render.Primitive._2D;
+using Unminal.UI.TextRender.TextRenderer;
+using Unminal.Utils.Colors;
+
 [SupportedOSPlatform("windows")]
 public class Console {
     public bool IsOpen {get; private set;} = false;
@@ -11,7 +16,7 @@ public class Console {
     private Text? _textRenderer;
     public string InputedCommand {get; private set;} = "";
     private bool _wasToggleKeyPressed = false;
-    private readonly string _pathToFileHistory = GetPath.GetCorrectPath(Engine.Paths.Config.ConsoleHistory);
+    private readonly string _pathToFileHistory = GetPath.GetCorrectPath(Engine.Paths.Config.ConsoleHistory, true);
     private KeyboardState? _prevInput;
 
     Square _background = new Square(
@@ -26,10 +31,10 @@ public class Console {
         History = ReadHistory();
         IsOpen = isOpen;
         _textRenderer = new Text(
-            GetPath.GetCorrectPath(Engine.Paths.Fonts.PFAgoraSlabPro_Bold),
+            AppContext.BaseDirectory + "Assets/fonts/PFAgoraSlabPro-Bold.ttf",
             256,
-            GetPath.GetCorrectPath(Engine.Paths.Shaders.textV),
-            GetPath.GetCorrectPath(Engine.Paths.Shaders.textF)
+            GetPath.GetCorrectPath(Engine.Paths.Shaders.textV, true),
+            GetPath.GetCorrectPath(Engine.Paths.Shaders.textF, true)
         );
     }
 
@@ -112,6 +117,9 @@ public class Console {
         }
         System.Console.Write("\x1b[0m");
     }
+
+    public static void Write() => Write("");
+    public static void WriteLine() => WriteLine("");
 
     public void DrawConsole(int width, int height) {
         if (!IsOpen) return;

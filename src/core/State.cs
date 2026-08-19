@@ -3,8 +3,16 @@
 // See LICENSE file for details.
 namespace Unminal.Core.State;
 
+using Unminal.Core.PlayerCamera;
+using Unminal.Render.Light;
+using Unminal.Utils.ConfigManager;
+using Unminal.Core.Input.Mouse.VisualState;
+
 [SupportedOSPlatform("windows")]
 public static class Engine {
+    // Global states
+    public static string[] args = {};
+    public static string ScriptingSystem = "";
     // Window state
     public static LightManager? LightManager { get; set; }
     public static ILightingPipeline? LightingPipeline { get; set; }
@@ -44,6 +52,9 @@ public static class Engine {
         public static bool IsFullScreen {get; set;}
         public static bool InDebugMenu {get; set;}
         public static bool InPause {get; set;}
+        public static class InputState {
+            public static CursorVisualState CurrentCursorVisual { get; set; } = CursorVisualState.Normal;
+        }
     }
 
     public static class Paths {
@@ -115,6 +126,12 @@ public static class Engine {
     public class LanguageChars {
         public const string EN = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         public const string RU = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+    }
+
+    public static void LoadEngineStates(string[] args) {
+        Engine.Paths.BaseFolder = AppDomain.CurrentDomain.BaseDirectory;
+        Engine.args = args;
+        Engine.ConfigManager = new();
     }
 }
 // yeah im soooo love word "maybe" 

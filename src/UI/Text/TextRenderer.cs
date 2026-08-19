@@ -3,6 +3,9 @@
 // See LICENSE file for details.
 namespace Unminal.UI.TextRender.TextRenderer;
 
+using Unminal.UI.TextRender.FontAtlas;
+using Unminal.Utils.Colors;
+
 [SupportedOSPlatform("windows")]
 public class Text : IDisposable {
     private readonly Atlas? _fontAtlas;
@@ -17,12 +20,12 @@ public class Text : IDisposable {
     private const int VERTEX_SIZE = 9;
 
     public Text(string fontPath, int fontSize) 
-        : this(fontPath, fontSize, GetPath.GetCorrectPath(Engine.Paths.Shaders.textV), GetPath.GetCorrectPath(Engine.Paths.Shaders.textF)) 
+        : this(fontPath, fontSize, GetPath.GetCorrectPath(Engine.Paths.Shaders.textV, true), GetPath.GetCorrectPath(Engine.Paths.Shaders.textF, true)) 
     {}
 
     public Text(string fontPath, int fontSize, string shaderVertex, string shaderFragment) {
         FontSize = fontSize;
-        _fontAtlas = new Atlas(GetPath.GetCorrectPath(fontPath), fontSize);
+        _fontAtlas = new Atlas(fontPath, fontSize);
 
         _vao = GL.GenVertexArray();
         GL.BindVertexArray(_vao);

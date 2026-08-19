@@ -3,17 +3,15 @@
 // See LICENSE file for details.
 namespace Unminal;
 
-using System.Runtime.Versioning;
-using Unminal.Script;
+using Unminal.Core.Scripting.Utils;
+using Unminal.Core.Commands.Manager;
 
 [SupportedOSPlatform("windows")]
 class Program {
-    static void Main() {
-        Engine.Paths.BaseFolder = AppDomain.CurrentDomain.BaseDirectory;
-        Engine.ConfigManager = new();
-        Core.Commands.Manager.CommandManager.LoadCommands();
-        var userGame = new MyGame();
-        using var engine = new Main.Main(userGame);
-        engine.Run();
+    static void Main(string[] args) {
+        Engine.Paths.BaseFolder = AppContext.BaseDirectory;
+        ScriptingUtils.LoadScriptingSystem(args);
+        Engine.LoadEngineStates(args);
+        CommandManager.LoadCommands();
     }
 }

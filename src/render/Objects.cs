@@ -3,9 +3,12 @@
 // See LICENSE file for details.
 namespace Unminal.Render.Objects;
 
+using Unminal.Core.ObjLoader;
+using Unminal.Render.MeshProgram;
+using Unminal.Render.ShaderProgram;
+
 [SupportedOSPlatform("windows")]
-public class GameObject : IDisposable
-{
+public class GameObject : IDisposable {
     public Mesh? Mesh { get; set; }
     public Shader? Shader { get; set; }
     public Vector3 Position { get; set; } = Vector3.Zero;
@@ -36,8 +39,8 @@ public class GameObject : IDisposable
         if (_defaultShader == null)
         {
             _defaultShader = new Shader(
-                GetPath.GetCorrectPath(Engine.Paths.Shaders.mainV),
-                GetPath.GetCorrectPath(Engine.Paths.Shaders.mainF)
+                GetPath.GetCorrectPath(Engine.Paths.Shaders.mainV, true),
+                GetPath.GetCorrectPath(Engine.Paths.Shaders.mainF, true)
             );
         }
         return _defaultShader;
@@ -45,7 +48,7 @@ public class GameObject : IDisposable
 
     public void Draw() {
         if (Engine.Player.CameraObj == null) {
-            Console.CreateLog(Console.LogType.WARNING, "Camera is null");
+            Log.Create(Log.LogType.WARNING, "Camera is null");
             return;
         }
         if (Mesh == null || Shader == null) return;

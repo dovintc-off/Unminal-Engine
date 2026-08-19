@@ -5,6 +5,11 @@ using Unminal.Render.Texture;
 
 namespace Unminal.Render.Billboards;
 
+using Unminal.Core.State;
+using Unminal.Render.Texture;
+using Unminal.Render.MeshProgram;
+using Unminal.Render.ShaderProgram;
+
 [SupportedOSPlatform("windows")]
 public class Billboard {
     private static Shader? _sharedShader;

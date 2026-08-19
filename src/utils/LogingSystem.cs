@@ -43,7 +43,7 @@ public static class Log {
         }
     }
 
-    public static void LogToFile(string LogText, string prefix, string textcolor, string resetcolor, bool CrashGame = false, string CrashError = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) {
+    private static void LogToFile(string LogText, string prefix, string textcolor, string resetcolor, bool CrashGame = false, string CrashError = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) {
         string calledFileName = Path.GetFileName(file);
         string FinalLogText = $"{prefix}{textcolor}{LogText}{resetcolor}Called in {calledFileName}:{line}";
         Logs.Add(FinalLogText);
@@ -70,7 +70,7 @@ public static class Log {
         return (prefix, textcolor, resetcolor, false);
     }
 
-    public static void SaveLog(string pathToFile = "data:/Log.txt"){File.AppendAllLines(GetPath.GetPath.GetCorrectPath(pathToFile), Logs);}
-    public static void ClearFileLog(string pathToFile = "data:/Log.txt"){File.WriteAllText(GetPath.GetPath.GetCorrectPath(pathToFile), "");}
-    public static void ClearLog(){Logs.Clear();}
+    private static void SaveLog(string pathToFile = "Assets/data/Log.txt"){File.AppendAllLines(GetPath.GetPath.GetCorrectPath(pathToFile, true), Logs);}
+    private static void ClearFileLog(string pathToFile = "Assets/data/Log.txt"){File.WriteAllText(GetPath.GetPath.GetCorrectPath(pathToFile, true), "");}
+    private static void ClearLog(){Logs.Clear();}
 }

@@ -47,9 +47,9 @@ public class Skybox : IDisposable
 
     private void LoadShaders()
     {
-        string vertCode = File.ReadAllText(GetPath.GetCorrectPath(Engine.Paths.Shaders.skyboxV));
+        string vertCode = File.ReadAllText(GetPath.GetCorrectPath(Engine.Paths.Shaders.skyboxV, true));
 
-        string fragCode = File.ReadAllText(GetPath.GetCorrectPath(Engine.Paths.Shaders.skyboxF));
+        string fragCode = File.ReadAllText(GetPath.GetCorrectPath(Engine.Paths.Shaders.skyboxF, true));
 
         int vertShader = GL.CreateShader(ShaderType.VertexShader);
         GL.ShaderSource(vertShader, vertCode);
@@ -57,7 +57,7 @@ public class Skybox : IDisposable
         
         GL.GetShader(vertShader, ShaderParameter.CompileStatus, out int vSuccess);
         if (vSuccess == 0) {
-            Console.CreateLog(Console.LogType.ERROR, "Vertex Shader Error: " + GL.GetShaderInfoLog(vertShader));
+            Log.Create(Log.LogType.ERROR, "Vertex Shader Error: " + GL.GetShaderInfoLog(vertShader));
         }
 
         int fragShader = GL.CreateShader(ShaderType.FragmentShader);
@@ -66,7 +66,7 @@ public class Skybox : IDisposable
 
         GL.GetShader(fragShader, ShaderParameter.CompileStatus, out int fSuccess);
         if (fSuccess == 0) {
-            Console.CreateLog(Console.LogType.ERROR, "Fragment Shader Error: " + GL.GetShaderInfoLog(fragShader));
+            Log.Create(Log.LogType.ERROR, "Fragment Shader Error: " + GL.GetShaderInfoLog(fragShader));
         }
 
         _shaderProgram = GL.CreateProgram();
@@ -77,7 +77,7 @@ public class Skybox : IDisposable
         GL.GetProgram(_shaderProgram, GetProgramParameterName.LinkStatus, out int lSuccess);
         if (lSuccess == 0)
         {
-            Console.CreateLog(Console.LogType.ERROR, "Link Error: " + GL.GetProgramInfoLog(_shaderProgram));
+            Log.Create(Log.LogType.ERROR, "Link Error: " + GL.GetProgramInfoLog(_shaderProgram));
         }
 
         GL.DeleteShader(vertShader);
@@ -118,7 +118,7 @@ public class Skybox : IDisposable
             {
                 if (!File.Exists(faces[i]))
                 {
-                    Console.CreateLog(Console.LogType.ERROR, $"File not found: {faces[i]}");
+                    Log.Create(Log.LogType.ERROR, $"File not found: {faces[i]}");
                     GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, 0, PixelInternalFormat.Rgb, 1, 1, 0, PixelFormat.Rgb, PixelType.UnsignedByte, IntPtr.Zero);
                     continue;
                 }
@@ -158,7 +158,7 @@ public class Skybox : IDisposable
             }
             catch (Exception ex)
             {
-                Console.CreateLog(Console.LogType.ERROR, $"Cant Loading face {i} ({faces[i]}): {ex.Message}");
+                Log.Create(Log.LogType.ERROR, $"Cant Loading face {i} ({faces[i]}): {ex.Message}");
                 GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, 0, PixelInternalFormat.Rgb, 1, 1, 0, PixelFormat.Rgb, PixelType.UnsignedByte, IntPtr.Zero);
             }
         }
