@@ -5,7 +5,10 @@
 ======== Plan In order =========
 ================================
 
-1. Create more ui elements: text field, etc.)
+1. Finish Lua Wraper & Lua Scripting
+2. Finish New Command System
+3. Finish Method GetCorrectPath (back textures:/ fonts:/ etc.)
+1. Create more ui elements: text field, etc.
 2. Better Console UI (currently, there is only one name for the UI in the console...)
 5. Creating primitive shapes from a box (cube, ball, etc.) (3D)
 6. Loading textures for objects
