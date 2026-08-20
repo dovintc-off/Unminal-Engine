@@ -5,7 +5,7 @@
 ======== Plan In order =========
 ================================
 
-1. Finish Lua Wraper & Lua Scripting
+1. Finish Lua Scripting
 2. Finish New Command System
 3. Finish Method GetCorrectPath (back textures:/ fonts:/ etc.)
 1. Create more ui elements: text field, etc.
@@ -29,7 +29,8 @@
 9. Combine the "Text" & "RichTextSegment" classes into one (30.07)
 10. Create class Billboard (draw with texture) (30.07)
 11. Complete class "Config" (19.08)
-12. Create more ui elements: button
+12. Create more ui elements: button (NOT COMPLETED)
+13. Finish Lua Wraper
 
 ================================ 
 ======== optimization ==========
