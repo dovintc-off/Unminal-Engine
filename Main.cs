@@ -15,6 +15,7 @@ using Unminal.Utils.Colors;
 [SupportedOSPlatform("windows")]
 public class Main : GameWindow {
     private readonly Script _userGame;
+    private float mouseWhellDelta;
     Matrix4 _model, _view, _projection;
     float _initialFov = MathHelper.PiOver4;
     private Text? _textRenderer;
@@ -45,6 +46,7 @@ private PerformanceMonitor? _perfMonitor;
     protected override void OnLoad() {
         base.OnLoad(); 
         gameConsole = new Console();
+        Engine.CurrentWindow = this;
 
         if (Engine.ConfigManager != null) {
             bool vsync = Engine.ConfigManager.GetConfig<bool>("VSync");
@@ -161,7 +163,6 @@ _perfMonitor = new PerformanceMonitor();
         // Console open/close
         if (gameConsole != null && gameConsole.IsOpen) {
             CursorState = CursorState.Normal;
-            Core.Input.Mouse.Cursor.CursorSetCrosshair();
         } else {
             if (input.IsKeyReleased(Keys.F3)) { 
                 if (Engine.CanF3) {
@@ -177,7 +178,6 @@ _perfMonitor = new PerformanceMonitor();
         // Script Update Data
         if (gameConsole == null || !gameConsole.IsOpen) {
             _userGame.Update();
-
             if (_userGame.ActiveCamera != null) {
                 _activeCameraRef = _userGame.ActiveCamera;
                 _view = _activeCameraRef.GetViewMatrix();
@@ -185,6 +185,8 @@ _perfMonitor = new PerformanceMonitor();
 
             _model = Matrix4.Identity;
         }
+
+        mouseWhellDelta = 0f;
     }
 
     private void HandleConsoleTextInput(TextInputEventArgs e) {
@@ -275,6 +277,7 @@ _perfMonitor!.Dispose();
     }
 
     protected override void OnMouseWheel(MouseWheelEventArgs e) {
+        mouseWhellDelta += e.OffsetY;
         base.OnMouseWheel(e);
         if (gameConsole != null && !gameConsole.IsOpen) {
             if (_activeCameraRef != null) {
@@ -283,6 +286,8 @@ _perfMonitor!.Dispose();
             }
         } 
     }
+
+    public float GetMouseWhellDelta() => mouseWhellDelta;
 }
 
 public static class TypeExtensions {

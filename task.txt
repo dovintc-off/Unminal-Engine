@@ -5,11 +5,10 @@
 ======== Plan In order =========
 ================================
 
-1. Finish Lua Scripting
-2. Finish New Command System
-3. Finish Method GetCorrectPath (back textures:/ fonts:/ etc.)
-1. Create more ui elements: text field, etc.
-2. Better Console UI (currently, there is only one name for the UI in the console...)
+1. Finish New Command System
+2. Finish Method GetCorrectPath (back textures:/ fonts:/ etc.)
+3. Create more ui elements: text field, etc.
+4. Better Console UI (currently, there is only one name for the UI in the console...)
 5. Creating primitive shapes from a box (cube, ball, etc.) (3D)
 6. Loading textures for objects
 7. Add the ability to create an outline for the text (Im so hate this stupid text development)
@@ -29,8 +28,8 @@
 9. Combine the "Text" & "RichTextSegment" classes into one (30.07)
 10. Create class Billboard (draw with texture) (30.07)
 11. Complete class "Config" (19.08)
-12. Create more ui elements: button (NOT COMPLETED)
-13. Finish Lua Wraper
+12. Create more ui elements: button (NOT COMPLETED) (19.08)
+13. Finish Lua Wraper & Lua Scripting (20.08-21.08)
 
 ================================ 
 ======== optimization ==========

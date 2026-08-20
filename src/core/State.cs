@@ -13,9 +13,10 @@ public static class Engine {
     // Global states
     public static string[] args = {};
     public static string ScriptingSystem = "";
+    public static Main.Main? CurrentWindow {get; internal set;}
     // Window state
-    public static LightManager? LightManager { get; set; }
-    public static ILightingPipeline? LightingPipeline { get; set; }
+    public static LightManager? LightManager {get; set;}
+    public static ILightingPipeline? LightingPipeline {get; set;}
     public static Config ConfigManager {get; set;} = new Config();
     public static Vector2i WindowSize {get; set;}
     public static float DeltaTime {get; set;}
