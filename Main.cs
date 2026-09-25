@@ -142,6 +142,8 @@ _perfMonitor = new PerformanceMonitor();
 
         if (!IsFocused) return;
 
+        Engine.DeltaTime = (float)e.Time;
+
         if (input.IsKeyReleased(Keys.Escape)) {
             Engine.GlobalWindowState.InPause = !Engine.GlobalWindowState.InPause;
             CursorState = Engine.GlobalWindowState.InPause ? CursorState.Normal : CursorState.Grabbed;
@@ -176,7 +178,7 @@ _perfMonitor = new PerformanceMonitor();
         }
 
         // Script Update Data
-        if (gameConsole == null || !gameConsole.IsOpen) {
+        if (!Engine.GlobalWindowState.InPause && (gameConsole == null || !gameConsole.IsOpen)) {
             _userGame.Update();
             if (_userGame.ActiveCamera != null) {
                 _activeCameraRef = _userGame.ActiveCamera;
@@ -202,13 +204,15 @@ _perfMonitor = new PerformanceMonitor();
     protected override void OnRenderFrame(FrameEventArgs e) {  
         base.OnRenderFrame(e);
         Engine.WindowSize = new Vector2i(Size.X, Size.Y);
-        Engine.DeltaTime = (float)e.Time;
         Engine.TotalTime += e.Time;
 
         if (_activeCameraRef != null) {
             _projection = Matrix4.CreatePerspectiveFieldOfView(
                 _activeCameraRef.FOV, Size.X / (float)Size.Y, 0.1f, 1000.0f);
         }
+
+        Matrix4 ortho = Matrix4.CreateOrthographicOffCenter(0, Size.X, Size.Y, 0, -1, 1);
+        Engine.Ortho = ortho;
 
         GL.ClearColor(0, 0, 0, 1);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -219,9 +223,7 @@ _perfMonitor = new PerformanceMonitor();
             gameConsole.DrawConsole(Size.X, Size.Y);
         } 
 
-        Matrix4 ortho = Matrix4.CreateOrthographicOffCenter(0, Size.X, Size.Y, 0, -1, 1);
-        Engine.Ortho = ortho;
-        float currentFps = 1.0f / Engine.DeltaTime;
+        float currentFps = e.Time > 0.0 ? 1.0f / (float)e.Time : 0.0f;
         _smoothFps = _smoothFps + (currentFps - _smoothFps) * 0.05f;
         
         if (_textRenderer != null && Engine.GlobalWindowState.InDebugMenu && _activeCameraRef != null) {
@@ -285,7 +287,7 @@ _perfMonitor!.Dispose();
         if (gameConsole != null && !gameConsole.IsOpen) {
             if (_activeCameraRef != null) {
                 _activeCameraRef.ProcessMouseScroll(e.OffsetY);
-                _projection = Matrix4.CreatePerspectiveFieldOfView(_activeCameraRef.FOV, Size.X / (float)Size.Y, 0.1f, 100.0f);
+                _projection = Matrix4.CreatePerspectiveFieldOfView(_activeCameraRef.FOV, Size.X / (float)Size.Y, 0.1f, 1000.0f);
             }
         } 
     }
