@@ -9,6 +9,7 @@ using Unminal.Core.PlayerCamera;
 using Unminal.Render.Texture;
 using Unminal.Render.Light;
 using Unminal.Render.Billboards;
+using Unminal.Render.Objects;
 using Unminal.UI.TextRender.TextRenderer;
 using Unminal.Utils.Colors;
 
@@ -265,6 +266,7 @@ _perfMonitor = new PerformanceMonitor();
         _lightManager?.Dispose();
         
         _userGame.Unload();
+        GameObject.ReleaseDefaultShader();
         Billboard.Dispose();
         Texture2D.Shutdown();
         
