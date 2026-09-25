@@ -62,17 +62,32 @@ public class LightManager : IDisposable {
 
         GL.BindBuffer(BufferTarget.UniformBuffer, _uboHandle);
 
-        GpuLight[] lightDataArray = new GpuLight[MaxLights];
-        for (int i = 0; i < _lights.Count; i++) {
-            lightDataArray[i] = _lights[i].Data;
-            _lights[i].MarkClean();
+        int count = _lights.Count;
+        int gpuLightSize = Marshal.SizeOf<GpuLight>();
+
+        if (count > 0) {
+            GpuLight[] lightDataArray = new GpuLight[count];
+            for (int i = 0; i < count; i++) {
+                lightDataArray[i] = _lights[i].Data;
+                _lights[i].MarkClean();
+            }
+
+            GL.BufferSubData(
+                BufferTarget.UniformBuffer,
+                IntPtr.Zero,
+                count * gpuLightSize,
+                lightDataArray
+            );
         }
 
-        int lightDataSize = lightDataArray.Length * Marshal.SizeOf<GpuLight>();
-        GL.BufferSubData(BufferTarget.UniformBuffer, IntPtr.Zero, lightDataSize, lightDataArray);
-
-        int count = _lights.Count;
-        GL.BufferSubData(BufferTarget.UniformBuffer, lightDataSize, sizeof(int), new int[] { count, 0, 0, 0 });
+        // std140 keeps lightCount after the full fixed-size light array.
+        int lightCountOffset = MaxLights * gpuLightSize;
+        GL.BufferSubData(
+            BufferTarget.UniformBuffer,
+            (IntPtr)lightCountOffset,
+            sizeof(int),
+            new int[] { count }
+        );
 
         GL.BindBuffer(BufferTarget.UniformBuffer, 0);
         _isDirty = false;
