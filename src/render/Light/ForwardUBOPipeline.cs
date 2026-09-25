@@ -9,6 +9,7 @@ using Unminal.Render.ShaderProgram;
 [SupportedOSPlatform("windows")]
 public class ForwardUBOPipeline : ILightingPipeline {
     private readonly LightManager _lightManager;
+    private readonly Dictionary<int, int> _lightBlockIndices = new();
 
     public ForwardUBOPipeline(LightManager lightManager) {
         _lightManager = lightManager;
@@ -21,12 +22,18 @@ public class ForwardUBOPipeline : ILightingPipeline {
     }
 
     public void ApplyLighting(Shader shader) {
-        int blockIndex = GL.GetUniformBlockIndex(shader.Handle, "LightBlock");
+        if (!_lightBlockIndices.TryGetValue(shader.Handle, out int blockIndex)) {
+            blockIndex = GL.GetUniformBlockIndex(shader.Handle, "LightBlock");
+            _lightBlockIndices[shader.Handle] = blockIndex;
+        }
+
         if (blockIndex != -1) {
             GL.UniformBlockBinding(shader.Handle, blockIndex, LightManager.LightBlockBinding);
         }
     }
 
     public void EndFrame() { }
-    public void Dispose() { }
+    public void Dispose() {
+        _lightBlockIndices.Clear();
+    }
 }
