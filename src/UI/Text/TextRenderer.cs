@@ -64,7 +64,7 @@ public class Text : IDisposable {
 
     private static int AcquireShaderProgram(string vertPath, string fragPath) {
         var key = (vertPath, fragPath);
-        if (_shaderCache.TryGetValue(key, out SharedShader? cached)) {
+        if (_shaderCache.TryGetValue(key, out SharedShader cached)) {
             cached.RefCount++;
             return cached.Handle;
         }
@@ -109,7 +109,7 @@ public class Text : IDisposable {
     }
 
     private static void ReleaseShaderProgram((string Vertex, string Fragment) key) {
-        if (!_shaderCache.TryGetValue(key, out SharedShader? shader))
+        if (!_shaderCache.TryGetValue(key, out SharedShader shader))
             return;
 
         shader.RefCount--;
