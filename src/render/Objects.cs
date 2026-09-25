@@ -56,6 +56,12 @@ public class GameObject : IDisposable {
         return _defaultShader;
     }
 
+    public static void ReleaseDefaultShader()
+    {
+        _defaultShader?.Dispose();
+        _defaultShader = null;
+    }
+
     public void Draw() {
         if (Engine.Player.CameraObj == null) {
             Log.Create(Log.LogType.WARNING, "Camera is null");
