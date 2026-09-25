@@ -20,7 +20,8 @@ public abstract class Primitive2D : IDisposable {
     private readonly string pathFragment = GetPath.GetCorrectPath(Engine.Paths.Shaders.baseF, true);
 
     public Primitive2D() {
-        InitializeGeometry();
+        // Derived primitives create their own geometry after their fields are initialized.
+        // Calling virtual GetVertices() from this constructor caused duplicate GPU resources.
         InitializeShader();
     }
 
@@ -112,9 +113,17 @@ public abstract class Primitive2D : IDisposable {
 
     public virtual void Dispose()
     {
-        GL.DeleteVertexArray(VAO);
-        GL.DeleteBuffer(VBO);
-        if (ShaderProgram != -1){
+        if (VAO != 0) {
+            GL.DeleteVertexArray(VAO);
+            VAO = 0;
+        }
+
+        if (VBO != 0) {
+            GL.DeleteBuffer(VBO);
+            VBO = 0;
+        }
+
+        if (ShaderProgram != -1) {
             GL.DeleteProgram(ShaderProgram);
             ShaderProgram = -1;
         }
