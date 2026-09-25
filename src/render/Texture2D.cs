@@ -137,17 +137,25 @@ public class Texture2D : IDisposable {
     }
 
     public static Texture2D GetOrCreateFileTexture(string path) {
-        if (_fileCache.TryGetValue(path, out var cachedTexture))
-            return cachedTexture;
+        if (_fileCache.TryGetValue(path, out var cachedTexture)) {
+            if (cachedTexture.Handle != 0)
+                return cachedTexture;
+
+            _fileCache.Remove(path);
+        }
 
         Texture2D newTexture = LoadFromFile(path);
-        _fileCache.Add(path, newTexture);
+        _fileCache[path] = newTexture;
         return newTexture;
     }
 
     public static Texture2D GetOrCreateColorTexture(Vector4 color) {
-        if (_colorCache.TryGetValue(color, out var cachedTexture))
-            return cachedTexture;
+        if (_colorCache.TryGetValue(color, out var cachedTexture)) {
+            if (cachedTexture.Handle != 0)
+                return cachedTexture;
+
+            _colorCache.Remove(color);
+        }
 
         byte r = (byte)(Math.Clamp(color.X, 0f, 1f) * 255);
         byte g = (byte)(Math.Clamp(color.Y, 0f, 1f) * 255);
@@ -168,29 +176,45 @@ public class Texture2D : IDisposable {
         GL.BindTexture(TextureTarget.Texture2D, 0);
 
         Texture2D newTexture = new Texture2D(handle, 1, 1);
-        _colorCache.Add(color, newTexture);
+        _colorCache[color] = newTexture;
         return newTexture;
     }
 
     public void Dispose() {
+        if (Handle == 0)
+            return;
+
         GL.DeleteTexture(Handle);
+        Handle = 0;
+        Width = 0;
+        Height = 0;
     }
 
     public static void ClearAllCaches() {
-        foreach (var tex in _colorCache.Values) tex.Dispose();
-        foreach (var tex in _fileCache.Values)  tex.Dispose();
+        foreach (var tex in _colorCache.Values)
+            tex.Dispose();
+
+        foreach (var tex in _fileCache.Values)
+            tex.Dispose();
+
         _colorCache.Clear();
         _fileCache.Clear();
+    }
+
+    public static void Shutdown() {
+        ClearAllCaches();
 
         if (_isUiInitialized) {
-            if (_uiShaderHandle != -1)
+            if (_uiShaderHandle != -1) {
                 GL.DeleteProgram(_uiShaderHandle);
-            
-            if (_dummyVao != -1)
-                GL.DeleteVertexArray(_dummyVao);
+                _uiShaderHandle = -1;
+            }
 
-            _uiShaderHandle = -1;
-            _dummyVao = -1;
+            if (_dummyVao != -1) {
+                GL.DeleteVertexArray(_dummyVao);
+                _dummyVao = -1;
+            }
+
             _isUiInitialized = false;
         }
     }
