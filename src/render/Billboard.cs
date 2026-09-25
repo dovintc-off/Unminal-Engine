@@ -100,14 +100,18 @@ public class Billboard {
         GL.BindTexture(TextureTarget.Texture2D, 0);
     }
 
-    public static void Dispose() 
+    public static void Dispose()
     {
         _sharedShader?.Dispose();
         _sharedMesh?.Dispose();
-        Texture2D.ClearAllCaches();
 
         _sharedShader = null;
         _sharedMesh = null;
+
+        _locPos = -1;
+        _locScale = -1;
+        _locTexture = -1;
+
         _isInitialized = false;
     }
 }
