@@ -8,13 +8,21 @@ using Unminal.Utils.Colors;
 
 [SupportedOSPlatform("windows")]
 public class Text : IDisposable {
-    private readonly Atlas? _fontAtlas;
+    private sealed class SharedShader {
+        public int Handle;
+        public int RefCount;
+    }
 
+    private static readonly Dictionary<(string Vertex, string Fragment), SharedShader> _shaderCache = new();
+
+    private readonly Atlas? _fontAtlas;
     private readonly int _vao;
     private readonly int _vbo;
     private readonly int _shaderProgram;
     private readonly int _locProjection;
     private readonly int _locTexture;
+    private readonly (string Vertex, string Fragment) _shaderKey;
+    private bool _disposed;
     private float FontSize;
     private readonly List<float> _vertexBuffer = new List<float>();
     private const int VERTEX_SIZE = 9;
@@ -46,39 +54,73 @@ public class Text : IDisposable {
 
         GL.BindVertexArray(0);
 
-        _shaderProgram = LoadShaderProgram(shaderVertex, shaderFragment);
+        _shaderKey = (shaderVertex, shaderFragment);
+        _shaderProgram = AcquireShaderProgram(shaderVertex, shaderFragment);
         GL.UseProgram(_shaderProgram);
         _locProjection = GL.GetUniformLocation(_shaderProgram, "projection");
         _locTexture = GL.GetUniformLocation(_shaderProgram, "uTexture");
         GL.UseProgram(0);
     }
 
-    private int LoadShaderProgram(string vertPath, string fragPath) {
+    private static int AcquireShaderProgram(string vertPath, string fragPath) {
+        var key = (vertPath, fragPath);
+        if (_shaderCache.TryGetValue(key, out SharedShader? cached)) {
+            cached.RefCount++;
+            return cached.Handle;
+        }
+
         string vertCode = File.ReadAllText(vertPath);
         string fragCode = File.ReadAllText(fragPath);
 
         int vertShader = GL.CreateShader(ShaderType.VertexShader);
-        GL.ShaderSource(vertShader, vertCode);
-        GL.CompileShader(vertShader);
-        CheckShaderCompile(vertShader, "Vertex");
-
         int fragShader = GL.CreateShader(ShaderType.FragmentShader);
-        GL.ShaderSource(fragShader, fragCode);
-        GL.CompileShader(fragShader);
-        CheckShaderCompile(fragShader, "Fragment");
+        int program = 0;
 
-        int program = GL.CreateProgram();
-        GL.AttachShader(program, vertShader);
-        GL.AttachShader(program, fragShader);
-        GL.LinkProgram(program);
+        try {
+            GL.ShaderSource(vertShader, vertCode);
+            GL.CompileShader(vertShader);
+            CheckShaderCompileStatic(vertShader, "Vertex");
 
-        GL.DeleteShader(vertShader);
-        GL.DeleteShader(fragShader);
+            GL.ShaderSource(fragShader, fragCode);
+            GL.CompileShader(fragShader);
+            CheckShaderCompileStatic(fragShader, "Fragment");
 
-        return program;
+            program = GL.CreateProgram();
+            GL.AttachShader(program, vertShader);
+            GL.AttachShader(program, fragShader);
+            GL.LinkProgram(program);
+
+            GL.GetProgram(program, GetProgramParameterName.LinkStatus, out int linkStatus);
+            if (linkStatus == 0)
+                throw new Exception($"Text Shader Link Error:\\n{GL.GetProgramInfoLog(program)}");
+
+            _shaderCache[key] = new SharedShader { Handle = program, RefCount = 1 };
+            return program;
+        }
+        catch {
+            if (program != 0)
+                GL.DeleteProgram(program);
+            throw;
+        }
+        finally {
+            GL.DeleteShader(vertShader);
+            GL.DeleteShader(fragShader);
+        }
     }
 
-    private void CheckShaderCompile(int shader, string type) {
+    private static void ReleaseShaderProgram((string Vertex, string Fragment) key) {
+        if (!_shaderCache.TryGetValue(key, out SharedShader? shader))
+            return;
+
+        shader.RefCount--;
+        if (shader.RefCount > 0)
+            return;
+
+        GL.DeleteProgram(shader.Handle);
+        _shaderCache.Remove(key);
+    }
+
+    private static void CheckShaderCompileStatic(int shader, string type) {
         GL.GetShader(shader, ShaderParameter.CompileStatus, out int success);
         if (success == 0) {
             string log = GL.GetShaderInfoLog(shader);
@@ -228,9 +270,13 @@ public class Text : IDisposable {
     } 
 
     public void Dispose() {
+        if (_disposed)
+            return;
+
+        _disposed = true;
         _fontAtlas!.Dispose();
         GL.DeleteVertexArray(_vao);
         GL.DeleteBuffer(_vbo);
-        GL.DeleteProgram(_shaderProgram);
+        ReleaseShaderProgram(_shaderKey);
     }
 }
