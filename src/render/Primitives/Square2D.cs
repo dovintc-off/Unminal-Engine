@@ -22,9 +22,9 @@ public class Square : Primitive2D {
         
         VertexCount = vertices.Length / 2;
         VAO = GL.GenVertexArray();
-        int vbo = GL.GenBuffer();
+        VBO = GL.GenBuffer();
         GL.BindVertexArray(VAO);
-        GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
         GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
         GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, 2 * sizeof(float), 0);
         GL.EnableVertexAttribArray(0);
