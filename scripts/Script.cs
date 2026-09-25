@@ -86,9 +86,7 @@ public class Game : Script {
         base.Unload();
 
         foreach (var obj in _objects) obj.Dispose();
-        EventBusUi.Unsubscribe<ButtonPressedEvent>(OnBtnPress);
-        EventBusUi.Unsubscribe<ButtonHeldEvent>(OnBtnHeld);
-        EventBusUi.Unsubscribe<ButtonRelesedEvent>(OnBtnReleased);
+        EventBusUi.UnsubscribeAll(this);
         Billboard.Dispose();
         _textRenderer?.Dispose();
         skybox?.Dispose();
