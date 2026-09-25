@@ -47,4 +47,16 @@ public static class EventBusUi {
             if (handlers.Count == 0) _subs.Remove(eventType);
         }
     }
+
+    public static void UnsubscribeAll(object subscriber) {
+        ArgumentNullException.ThrowIfNull(subscriber);
+
+        foreach (var pair in _subs.ToArray()) {
+            pair.Value.RemoveAll(handler => ReferenceEquals(handler.Target, subscriber));
+            if (pair.Value.Count == 0)
+                _subs.Remove(pair.Key);
+        }
+    }
+
+    public static void Clear() => _subs.Clear();
 }
