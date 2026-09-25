@@ -1,95 +1,172 @@
-namespace Dov1ntc.MyGameIn3d;
+namespace Dovintc.MyGameIn3d;
 
-using static Dov1ntc.MyGameIn3d.Scene;
-using Unminal.Core.Scripting.Script;
-using Unminal.Core.Scripting.Utils;
-using Unminal.Core.Commands.Structure;
-using Unminal.Core.State;
 using Unminal.Core.PlayerCamera;
-using Unminal.Core.Commands.Manager;
+using Unminal.Core.Scripting.Script;
 using Unminal.Render.Light;
 using Unminal.Render.Objects;
-using Unminal.Render.SkyBox;
-using Unminal.Render.Billboards;
-using Unminal.UI.TextRender.TextRenderer;
-using Unminal.UI.EventBus;
 using Unminal.Utils.Colors;
 
 [SupportedOSPlatform("windows")]
 [Script]
 public class Game : Script {
-    private List<GameObject> _objects = new List<GameObject>();
-    private Skybox? skybox;
-    private Text? _textRenderer;
+    private readonly List<GameObject> _spawnedCubes = new();
+    private readonly List<LightData> _spawnedLights = new();
+
+    private const float CubeSpawnInterval = 0.25f;
+    private const float MinCubeSpawnRadius = 8.0f;
+    private const float MaxCubeSpawnRadius = 18.0f;
+    private const float MinCubeDistance = 4.0f;
+    private const float CubeHeightRange = 3.0f;
+    private const float CubeScaleMin = 0.5f;
+    private const float CubeScaleMax = 2.0f;
+
+    private float _cubeSpawnTimer;
+    private Vector3 _lastPlayerPosition;
+    private bool _hasPreviousPlayerPosition;
 
     public override void Load(Matrix4 initialProjection) {
-        EventBusUi.Subscribe<ButtonPressedEvent>(OnBtnPress);
-        EventBusUi.Subscribe<ButtonHeldEvent>(OnBtnHeld);
-        EventBusUi.Subscribe<ButtonRelesedEvent>(OnBtnReleased);
-
         ActiveCamera = new Camera(new Vector3(0, 0, 0), -90.0f, 0.0f);
-        _objects = LoadScene(_objects);
+        _lastPlayerPosition = ActiveCamera.Position;
+        _hasPreviousPlayerPosition = true;
+        _cubeSpawnTimer = 0.0f;
 
         Engine.LightManager?.ClearLights();
-        Engine.LightManager?.AddLight(new LightData(new Vector3(0, 0, 0), Colors.White, 30f));
-
-        _textRenderer = new Text("Assets/fonts/PFAgoraSlabPro-Bold.ttf", 256);
-
-        skybox = new Skybox(Engine.Paths.BaseSkyBoxAssets);
-
-        CommandManager.AddCommand("debug", new Command(){Name = "SayHello", Layer = null!, ExecuteMethod = "SayHello", ExecutedLayer = true});
-        CommandManager.AddCommand("debug", new Command(){Name = "Server", Layer = null!, ExecutedLayer = false});
-        CommandManager.AddCommand("Server", new Command(){Name = "Open", Layer = null!, ExecuteMethod = "ServerOpen", ExecutedLayer = true});
-        CommandManager.AddCommand("Server", new Command(){Name = "Conect", Layer = null!, ExecuteMethod = "ServerConect", ExecutedLayer = true});
+        _spawnedLights.Clear();
+        _spawnedCubes.Clear();
     }
-
-    public void OnBtnPress(ButtonPressedEvent e) =>
-        Console.WriteLine($"\n[#blue]Button Pressed on {e.ButtonId}");
-
-    public void OnBtnHeld(ButtonHeldEvent e) =>
-        Console.Write($"\rDuration Held: {e.Duration:F3} on {e.ButtonId}");  
-
-    public void OnBtnReleased(ButtonRelesedEvent e) => 
-        Console.WriteLine($"\n[#blue]Button Released on {e.ButtonId}");
 
     public override void Update() {
         base.Update();
-        
-        if (Engine.Player.CameraObj == null) return;
 
-        btn1?.Update();
+        Camera? camera = Engine.Player.CameraObj ?? ActiveCamera;
+        if (camera == null) return;
 
-        teapot1?.Rotate(90f, "x");
-        cube1?.Rotate(90f, "y");
-        cube2?.Rotate(90f, "z");
+        Vector3 playerPosition = camera.Position;
+        bool isMoving = _hasPreviousPlayerPosition &&
+                        (playerPosition - _lastPlayerPosition).LengthSquared > 0.000001f;
 
-        Engine.LightManager?.ClearLights();
-        Engine.LightManager?.AddLight(new LightData(Engine.Player.CameraObj.Position, Colors.White, 30f));
-    }
+        if (isMoving) {
+            _cubeSpawnTimer += Engine.DeltaTime;
 
-    public override void Draw() {
-        skybox!.Draw();
+            if (_cubeSpawnTimer >= CubeSpawnInterval) {
+                _cubeSpawnTimer = 0.0f;
+                SpawnCubeAroundPlayer(playerPosition);
+            }
+        } else {
+            _cubeSpawnTimer = 0.0f;
+        }
 
-        foreach (var obj in _objects) obj.Draw();
+        _lastPlayerPosition = playerPosition;
+        _hasPreviousPlayerPosition = true;
 
-        new Billboard()
-            .Position(new Vector3(15, 8, -40)).Scale(new Vector2(8.0f, 5.0f))
-            .Texture("Assets/textures/cat.png").Draw();
-
-        if (Console.Instance!.IsOpen) {
-            Scene.btn1?.Draw();
-            _textRenderer!.DrawString("Hello!", 200, 200, 20, new Vector4(1, 1, 1, 1));
+        // E creates a permanent point light 40 units in front of the player.
+        if (Engine.CurrentKeyboard?.IsKeyReleased(Keys.E) == true) {
+            SpawnLightInFrontOfPlayer(camera);
         }
     }
 
-    public override void Unload() {
-        base.Unload();
+    public override void Draw() {
+        foreach (GameObject cube in _spawnedCubes) {
+            cube.Draw();
+        }
+    }
 
-        foreach (var obj in _objects) obj.Dispose();
-        EventBusUi.UnsubscribeAll(this);
-        Billboard.Dispose();
-        _textRenderer?.Dispose();
-        skybox?.Dispose();
-        Scene.btn1?.Dispose();
+    private void SpawnCubeAroundPlayer(Vector3 playerPosition) {
+        const int maxAttempts = 12;
+
+        for (int attempt = 0; attempt < maxAttempts; attempt++) {
+            float angle = Random.Shared.NextSingle() * MathF.Tau;
+            float radius = Random.Shared.NextSingle() *
+                           (MaxCubeSpawnRadius - MinCubeSpawnRadius) +
+                           MinCubeSpawnRadius;
+
+            Vector3 position = playerPosition + new Vector3(
+                MathF.Cos(angle) * radius,
+                (Random.Shared.NextSingle() * 2.0f - 1.0f) * CubeHeightRange,
+                MathF.Sin(angle) * radius
+            );
+
+            if ((position - playerPosition).LengthSquared < MinCubeDistance * MinCubeDistance)
+                continue;
+
+            bool overlapsExistingCube = false;
+
+            foreach (GameObject existingCube in _spawnedCubes) {
+                if ((position - existingCube.Position).LengthSquared < 4.0f * 4.0f) {
+                    overlapsExistingCube = true;
+                    break;
+                }
+            }
+
+            if (overlapsExistingCube)
+                continue;
+
+            GameObject cube = new GameObject(
+                GetPath.GetCorrectPath("Assets/objects/cube.obj")
+            );
+
+            cube.Position = position;
+
+            float scale = Random.Shared.NextSingle() *
+                          (CubeScaleMax - CubeScaleMin) +
+                          CubeScaleMin;
+
+            cube.Scale = new Vector3(scale);
+
+            cube.Color = CreateDarkRandomColor();
+            cube.Orientation = Quaternion.FromEulerAngles(
+                Random.Shared.NextSingle() * MathF.Tau,
+                Random.Shared.NextSingle() * MathF.Tau,
+                Random.Shared.NextSingle() * MathF.Tau
+            );
+
+            _spawnedCubes.Add(cube);
+            return;
+        }
+    }
+
+    private static Vector3 CreateDarkRandomColor() {
+        // Keep every channel dark enough that the cubes remain visibly shaded.
+        float red = Random.Shared.NextSingle() * 0.35f + 0.10f;
+        float green = Random.Shared.NextSingle() * 0.35f + 0.10f;
+        float blue = Random.Shared.NextSingle() * 0.35f + 0.10f;
+
+        return new Vector3(red, green, blue);
+    }
+
+    private void SpawnLightInFrontOfPlayer(Camera camera) {
+        Vector3 position = camera.Position + camera.Front * 40.0f;
+
+        Vector3 color = CreateLightColor();
+
+        LightData light = new LightData(
+            position,
+            color,
+            30.0f
+        );
+
+        Engine.LightManager?.AddLight(light);
+        _spawnedLights.Add(light);
+    }
+
+    private static Vector3 CreateLightColor() {
+        float red = Random.Shared.NextSingle() * 0.5f + 0.5f;
+        float green = Random.Shared.NextSingle() * 0.5f + 0.5f;
+        float blue = Random.Shared.NextSingle() * 0.5f + 0.5f;
+
+        return new Vector3(red, green, blue);
+    }
+
+    public override void Unload() {
+        foreach (GameObject cube in _spawnedCubes) {
+            cube.Dispose();
+        }
+
+        _spawnedCubes.Clear();
+
+        Engine.LightManager?.ClearLights();
+        _spawnedLights.Clear();
+
+        base.Unload();
     }
 }
