@@ -92,7 +92,7 @@ public class Text : IDisposable {
 
             GL.GetProgram(program, GetProgramParameterName.LinkStatus, out int linkStatus);
             if (linkStatus == 0)
-                throw new Exception($"Text Shader Link Error:\\n{GL.GetProgramInfoLog(program)}");
+                throw new Exception($"Text Shader Link Error:\n{GL.GetProgramInfoLog(program)}");
 
             _shaderCache[key] = new SharedShader { Handle = program, RefCount = 1 };
             return program;
