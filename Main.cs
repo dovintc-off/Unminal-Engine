@@ -262,8 +262,11 @@ _perfMonitor = new PerformanceMonitor();
         _lightingPipeline?.Dispose();
         _lightManager?.Dispose();
         
-        base.OnUnload();
         _userGame.Unload();
+        Billboard.Dispose();
+        Texture2D.Shutdown();
+        
+        base.OnUnload();
         int currentX = this.Location.X;
         int currentY = this.Location.Y;
         Engine.ConfigManager?.SetConfig(newLocationX: $"{currentX}");
