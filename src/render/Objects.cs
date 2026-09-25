@@ -16,16 +16,26 @@ public class GameObject : IDisposable {
     public Vector3 Scale { get; set; } = Vector3.One;
     public Vector3 Color { get; set; } = Vector3.One;
     private bool _disposed = false;
+    private readonly bool _ownsMesh;
     private static Shader? _defaultShader;
 
     public GameObject(Mesh mesh, Shader shader) {
         Mesh = mesh;
         Shader = shader;
+        _ownsMesh = false;
     }
 
-    public GameObject(string objFilePath) 
-        : this(LoadMeshFromObj(objFilePath), GetOrCreateDefaultShader()) 
-    {
+    public GameObject(string objFilePath) {
+        Mesh? mesh = null;
+        try {
+            mesh = LoadMeshFromObj(objFilePath);
+            Mesh = mesh;
+            Shader = GetOrCreateDefaultShader();
+            _ownsMesh = true;
+        } catch {
+            mesh?.Dispose();
+            throw;
+        }
     }
 
     private static Mesh LoadMeshFromObj(string path)
@@ -93,7 +103,7 @@ public class GameObject : IDisposable {
 
     protected virtual void Dispose(bool disposing) {
         if (!_disposed) {
-            if (disposing) {
+            if (disposing && _ownsMesh) {
                 Mesh?.Dispose();
             }
             Mesh = null;
@@ -103,7 +113,4 @@ public class GameObject : IDisposable {
         }
     }
 
-    ~GameObject() {
-        Dispose(false);
-    }
 }
