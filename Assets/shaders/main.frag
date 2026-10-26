@@ -17,7 +17,7 @@ struct Light {
 };
 
 layout(std140) uniform LightBlock {
-    Light lights[1000];
+    Light lights[64];
     int lightCount;
     int _pad1;
     int _pad2;

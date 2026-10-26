@@ -18,6 +18,7 @@ using Unminal.Utils.Colors;
 [SupportedOSPlatform("windows")]
 [Script]
 public class Game : Script {
+    private LightData? _cameraLight;
     private List<GameObject> _objects = new List<GameObject>();
     private Skybox? skybox;
     private Text? _textRenderer;
@@ -31,7 +32,15 @@ public class Game : Script {
         _objects = LoadScene(_objects);
 
         Engine.LightManager?.ClearLights();
-        Engine.LightManager?.AddLight(new LightData(new Vector3(0, 0, 0), Colors.White, 30f));
+
+        var cameraLight = new LightData(
+            ActiveCamera!.Position,
+            Colors.White,
+            30f
+        );
+
+        _cameraLight = cameraLight;
+        Engine.LightManager?.AddLight(cameraLight);
 
         _textRenderer = new Text("Assets/fonts/PFAgoraSlabPro-Bold.ttf", 256);
 
@@ -63,8 +72,9 @@ public class Game : Script {
         cube1?.Rotate(90f, "y");
         cube2?.Rotate(90f, "z");
 
-        Engine.LightManager?.ClearLights();
-        Engine.LightManager?.AddLight(new LightData(Engine.Player.CameraObj.Position, Colors.White, 30f));
+        if (Engine.Player.CameraObj != null && _cameraLight != null) {
+            _cameraLight.Position = Engine.Player.CameraObj.Position;
+        }
     }
 
     public override void Draw() {

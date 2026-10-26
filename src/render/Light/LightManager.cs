@@ -7,8 +7,11 @@ using System.Runtime.InteropServices;
 
 [SupportedOSPlatform("windows")]
 public class LightManager : IDisposable {
-    public const int MaxLights = 1000; 
+    public const int MaxLights = 64; 
     public const int LightBlockBinding = 0; 
+    private static readonly int LightStride = Marshal.SizeOf<GpuLight>();
+    private readonly GpuLight[] _lightDataArray = new GpuLight[MaxLights];
+    private readonly int[] _lightCountData = new int[4];
 
     private readonly List<LightData> _lights = new List<LightData>();
     private int _uboHandle;
@@ -24,7 +27,7 @@ public class LightManager : IDisposable {
         _uboHandle = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.UniformBuffer, _uboHandle);
         
-        int dataSize = (MaxLights * Marshal.SizeOf<GpuLight>()) + 16; 
+        int dataSize = MaxLights * LightStride + 16;
         GL.BufferData(BufferTarget.UniformBuffer, dataSize, IntPtr.Zero, BufferUsageHint.DynamicDraw);
         
         GL.BindBufferBase(BufferRangeTarget.UniformBuffer, LightBlockBinding, _uboHandle);
@@ -62,17 +65,38 @@ public class LightManager : IDisposable {
 
         GL.BindBuffer(BufferTarget.UniformBuffer, _uboHandle);
 
-        GpuLight[] lightDataArray = new GpuLight[MaxLights];
         for (int i = 0; i < _lights.Count; i++) {
-            lightDataArray[i] = _lights[i].Data;
-            _lights[i].MarkClean();
+            _lightDataArray[i] = _lights[i].Data;
         }
 
-        int lightDataSize = lightDataArray.Length * Marshal.SizeOf<GpuLight>();
-        GL.BufferSubData(BufferTarget.UniformBuffer, IntPtr.Zero, lightDataSize, lightDataArray);
+        int activeBytes = _lights.Count * LightStride;
 
-        int count = _lights.Count;
-        GL.BufferSubData(BufferTarget.UniformBuffer, lightDataSize, sizeof(int), new int[] { count, 0, 0, 0 });
+        if (activeBytes > 0) {
+            GL.BufferSubData(
+                BufferTarget.UniformBuffer,
+                IntPtr.Zero,
+                activeBytes,
+                _lightDataArray
+            );
+        }
+
+        int countOffset = MaxLights * LightStride;
+
+        _lightCountData[0] = _lights.Count;
+        _lightCountData[1] = 0;
+        _lightCountData[2] = 0;
+        _lightCountData[3] = 0;
+
+        GL.BufferSubData(
+            BufferTarget.UniformBuffer,
+            new IntPtr(countOffset),
+            16,
+            _lightCountData
+        );
+
+        foreach (var light in _lights) {
+            light.MarkClean();
+        }
 
         GL.BindBuffer(BufferTarget.UniformBuffer, 0);
         _isDirty = false;

@@ -9,9 +9,9 @@ using Unminal.Core.Commands.Manager;
 [SupportedOSPlatform("windows")]
 class Program {
     static void Main(string[] args) {
-        Engine.Paths.BaseFolder = AppContext.BaseDirectory;
-        ScriptingUtils.LoadScriptingSystem(args);
         Engine.LoadEngineStates(args);
         CommandManager.LoadCommands();
+        ScriptingUtils.LoadScriptingSystem(args);
+        Engine.Paths.BaseFolder = AppContext.BaseDirectory;
     }
 }
