@@ -68,9 +68,7 @@ public class Game : Script {
 
         btn1?.Update();
 
-        teapot1?.Rotate(90f, "x");
-        cube1?.Rotate(90f, "y");
-        cube2?.Rotate(90f, "z");
+        teapot?.Rotate(90f, "x");
 
         if (Engine.Player.CameraObj != null && _cameraLight != null) {
             _cameraLight.Position = Engine.Player.CameraObj.Position;

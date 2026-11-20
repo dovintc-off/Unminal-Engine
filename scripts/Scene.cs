@@ -9,31 +9,31 @@ using Unminal.Utils.Colors;
 [SupportedOSPlatform("windows")]
 public class Scene {
     public static Circle? circle;
-    public static GameObject? cube1;
-    public static GameObject? cube2;
-    public static GameObject? teapot1;
+    public static GameObject? cube;
+    public static GameObject? node;
+    public static GameObject? teapot;
     public static Button? btn1;
 
     public static List<GameObject> LoadScene(List<GameObject> _objects){
         circle = new Circle(new Vector2(400, 400), 64, new Vector4(0f, 1f, 0f, 0.7f), 64);
 
-        cube1 = new GameObject(GetPath.GetCorrectPath("Assets/objects/cube.obj")); 
-        cube1.Position = new Vector3(0, 0, -40);
-        cube1.Scale = new Vector3(4f);
-        cube1.Color = Colors.CornflowerBlue;
-        _objects.Add(cube1);
+        cube = new GameObject(GetPath.GetCorrectPath("scripts/objects/cube.obj")); 
+        cube.Position = new Vector3(15, 0, -40);
+        cube.Scale = new Vector3(1f);
+        cube.Color = Colors.CornflowerBlue;
+        _objects.Add(cube);
 
-        cube2 = new GameObject(GetPath.GetCorrectPath("Assets/objects/cube.obj")); 
-        cube2.Position = new Vector3(0, 8, -40);
-        cube2.Scale = new Vector3(4f);
-        cube2.Color = Colors.Silver;
-        _objects.Add(cube2);
+        node = new GameObject(GetPath.GetCorrectPath("scripts/objects/power_node.obj")); 
+        node.Position = new Vector3(0, -5, -40);
+        node.Scale = new Vector3(0.4f);
+        node.Color = Colors.Silver;
+        _objects.Add(node);
 
-        teapot1 = new GameObject(GetPath.GetCorrectPath("Assets/objects/teapot.obj")); 
-        teapot1.Position = new Vector3(-15, 0, -40);
-        teapot1.Scale = new Vector3(0.2f);
-        teapot1.Color = Colors.Green;
-        _objects.Add(teapot1);
+        teapot = new GameObject(GetPath.GetCorrectPath("scripts/objects/teapot.obj")); 
+        teapot.Position = new Vector3(-15, 0, -40);
+        teapot.Scale = new Vector3(0.2f);
+        teapot.Color = Colors.Green;
+        _objects.Add(teapot);
     
         btn1 = UIFactory.CreateButton(
             pos:new Vector2(190f, 190f), 
