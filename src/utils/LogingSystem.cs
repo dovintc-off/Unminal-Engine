@@ -20,7 +20,7 @@ public static class Log {
 
     private static void LogToSystemConsole(string LogText, string prefix, string textcolor, string resetcolor, bool CrashGame = false, string CrashError = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0){
         string calledFileName = Path.GetFileName(file);
-        string FinalLogText = $"{prefix}{textcolor}{LogText}{resetcolor}Called in {calledFileName}:{line}";
+        string FinalLogText = $"{prefix}{textcolor}{LogText}{resetcolor}Called in {calledFileName}:{line} ({Engine.Timer.Stop():f0} ms)";
         Logs.Add(FinalLogText);
 
         Console.WriteLine(FinalLogText);

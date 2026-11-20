@@ -3,6 +3,8 @@
 // See LICENSE file for details.
 namespace Unminal.Core.State;
 
+using System.Diagnostics;
+
 using Unminal.Core.PlayerCamera;
 using Unminal.Render.Light;
 using Unminal.Utils.ConfigManager;
@@ -14,6 +16,7 @@ public static class Engine {
     public static string[] args = {};
     public static string ScriptingSystem = "";
     public static Main.Main? CurrentWindow {get; internal set;}
+    public static GameTimer Timer {get;} = new(); // Counting From Start Game
     // Window state
     public static LightManager? LightManager {get; set;}
     public static ILightingPipeline? LightingPipeline {get; set;}
@@ -136,3 +139,15 @@ public static class Engine {
     }
 }
 // yeah im soooo love word "maybe" 
+
+public class GameTimer{
+    private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
+
+    public double Stop() {
+        return _stopwatch.Elapsed.TotalMilliseconds;
+    }
+
+    public void Reset() {
+        _stopwatch.Restart();
+    }
+}
