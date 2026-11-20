@@ -25,11 +25,29 @@ public class Main : GameWindow {
     private ILightingPipeline? _lightingPipeline;
     private Dictionary<string, string> _debugTexts = new();
     private float _smoothFps = 60f;
+    private Texture2D? _loadingLogoTexture;
+    private Texture2D? _loadingTextTexture;
+    private float _loadingAlpha = 1f;
+    private bool _isLoadingFade;
+    private const float LoadingFadeDuration = 1.0f;
+    private int _frameTriangles;
+    private int _frameDrawCalls;
+    private int _drawCallsAccumulator;
+    private int _drawCallsPerSecond;
+    private double _drawCallsElapsed;
+    private const int GpuQueryCount = 4;
+    private readonly int[] _gpuTimeQueries = new int[GpuQueryCount];
+    private readonly int[] _gpuPrimitiveQueries = new int[GpuQueryCount];
+    private int _gpuQueryFrame;
+    private bool _gpuTimerQueriesSupported;
+    private bool _gpuPrimitiveQueriesSupported;
+    private double _gpuTimeMilliseconds = double.NaN;
+    private long _gpuPrimitives = -1;
 #if DEBUG
 private PerformanceMonitor? _perfMonitor;
 #endif
     public Main(Script userGame) : base(
-            new GameWindowSettings() { UpdateFrequency = 60 }, 
+            new GameWindowSettings() { UpdateFrequency = 100000 }, 
             new NativeWindowSettings(){ 
                 Location =  new Vector2i(Engine.ConfigManager.GetConfig<int>("LocationX"), Engine.ConfigManager.GetConfig<int>("LocationY")),
                 ClientSize = new Vector2i(Engine.ConfigManager.GetConfig<int>("Width"), Engine.ConfigManager.GetConfig<int>("Height")),
@@ -56,11 +74,14 @@ private PerformanceMonitor? _perfMonitor;
         GL.Enable(EnableCap.DepthTest);
         GL.Enable(EnableCap.Blend); 
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+        InitializeGpuQueries();
 
         GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-        var loadingTexture = Texture2D.GetOrCreateFileTexture(GetPath.GetCorrectPath("/Assets/textures/loading.png", true));
-        loadingTexture.Draw2D(50f, 50f, Size.X, Size.Y);
+        _loadingLogoTexture = Texture2D.GetOrCreateFileTexture(GetPath.GetCorrectPath("/Assets/textures/EngineLogo.png", true));
+        _loadingTextTexture = Texture2D.GetOrCreateFileTexture(GetPath.GetCorrectPath("/Assets/textures/loading.png", true));
+
+        DrawLoadingScreen(1f);
         Context.SwapBuffers();
 
         _textRenderer = new Text(
@@ -75,11 +96,9 @@ private PerformanceMonitor? _perfMonitor;
             GetPath.GetCorrectPath("Assets/shaders/billboard.frag", true)
         );
         
-        Context.SwapBuffers();
         _model = Matrix4.Identity;
         _projection = Matrix4.CreatePerspectiveFieldOfView(_initialFov, Size.X / (float)Size.Y, 0.1f, 1000.0f);
 
-        Context.SwapBuffers();
         _lightManager = new LightManager();
 
         string lightType = Engine.ConfigManager?.GetConfig<string>("LightType") ?? "Forward-Rendering-With-UBO";
@@ -99,7 +118,6 @@ _perfMonitor = new PerformanceMonitor();
         Engine.LightManager = _lightManager;
         Engine.LightingPipeline = _lightingPipeline;
 
-        Context.SwapBuffers();
         _userGame.Load(_projection);
 
         _activeCameraRef = _userGame.ActiveCamera;
@@ -110,6 +128,8 @@ _perfMonitor = new PerformanceMonitor();
         }
 
         _view = _activeCameraRef.GetViewMatrix();
+        _loadingAlpha = 1f;
+        _isLoadingFade = true;
         
         if (Engine.ConfigManager == null) return;
         Engine.CanF3 = Engine.ConfigManager.GetConfig<bool>("Canf3");
@@ -201,6 +221,8 @@ _perfMonitor = new PerformanceMonitor();
 
     protected override void OnRenderFrame(FrameEventArgs e) {  
         base.OnRenderFrame(e);
+        _frameTriangles = 0;
+        _frameDrawCalls = 0;
         Engine.WindowSize = new Vector2i(Size.X, Size.Y);
         Engine.DeltaTime = (float)e.Time;
         Engine.TotalTime += e.Time;
@@ -212,8 +234,38 @@ _perfMonitor = new PerformanceMonitor();
 
         GL.ClearColor(0, 0, 0, 1);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+        if (_isLoadingFade) {
+            _loadingAlpha -= (float)e.Time / LoadingFadeDuration;
+            if (_loadingAlpha <= 0f) {
+                _loadingAlpha = 0f;
+                _isLoadingFade = false;
+                _loadingLogoTexture = null;
+                _loadingTextTexture = null;
+            }
+
+            if (_loadingAlpha > 0f)
+                DrawLoadingScreen(_loadingAlpha);
+            Context.SwapBuffers();
+            return;
+        }
+
         _lightingPipeline?.BeginFrame();
+        ReadGpuQueryResults();
+        BeginGpuQueries();
         _userGame.Draw();
+        EndGpuQueries();
+
+        _drawCallsElapsed += e.Time;
+        _drawCallsAccumulator += _frameDrawCalls;
+
+        if (_drawCallsElapsed >= 1.0)
+        {
+            _drawCallsPerSecond = (int)(_drawCallsAccumulator / _drawCallsElapsed);
+
+            _drawCallsAccumulator = 0;
+            _drawCallsElapsed = 0;
+        }
 
         if (gameConsole != null && gameConsole.IsOpen) {
             gameConsole.DrawConsole(Size.X, Size.Y);
@@ -236,6 +288,15 @@ _perfMonitor = new PerformanceMonitor();
                 "Dir: {0:F1} {1:F1} {2:F1}", 
                 _activeCameraRef.Front.X, _activeCameraRef.Front.Y, _activeCameraRef.Front.Z);
             _debugTexts["pc-Resources"] = "PC resources: Telemetry Disabled";
+            string gpuPrimitives = _gpuPrimitives >= 0 ? _gpuPrimitives.ToString(CultureInfo.InvariantCulture) : "N/A";
+            string gpuTime = !double.IsNaN(_gpuTimeMilliseconds)
+                ? $"{_gpuTimeMilliseconds.ToString("F1", CultureInfo.InvariantCulture)} ms"
+                : "N/A";
+            _debugTexts["triangles"] =
+                $"Triangles: {_frameTriangles} | GPU Primitives: {gpuPrimitives}";
+
+            _debugTexts["draw-calls"] =
+                $"Draw Calls: {_drawCallsPerSecond}/sec | GPU Time: {gpuTime}";
 #if DEBUG
             if (_perfMonitor != null)
                 _debugTexts["pc-Resources"] = $"{_perfMonitor.GetMemory()} | {_perfMonitor.GetCPU()} | {_perfMonitor.GetGPU()}";
@@ -245,8 +306,24 @@ _perfMonitor = new PerformanceMonitor();
             _textRenderer.DrawString(_debugTexts["pos&fov"], 10, 55, TS, new Vector4(Colors.White, 1f), 1f);
             _textRenderer.DrawString(_debugTexts["direction"], 10, 80, TS, new Vector4(Colors.White, 1f), 1f); 
             _textRenderer.DrawString(_debugTexts["pc-Resources"], 10, 105, TS, new Vector4(Colors.White, 1f), 1f);
+            _textRenderer.DrawString(_debugTexts["triangles"], 10, 130, TS, new Vector4(Colors.White, 1f), 1f);
+            _textRenderer.DrawString(_debugTexts["draw-calls"], 10, 155, TS, new Vector4(Colors.White, 1f), 1f);
         }
         Context.SwapBuffers();
+    }
+
+    private void DrawLoadingScreen(float alpha) {
+        if (_loadingLogoTexture == null || _loadingTextTexture == null) return;
+
+        const float spacing = 24f;
+        float groupHeight = _loadingLogoTexture.Height + spacing + _loadingTextTexture.Height;
+        float logoX = (Size.X - _loadingLogoTexture.Width) * 0.5f;
+        float logoY = (Size.Y - groupHeight) * 0.5f;
+        float textX = (Size.X - _loadingTextTexture.Width) * 0.5f;
+        float textY = logoY + _loadingLogoTexture.Height + spacing;
+
+        _loadingLogoTexture.Draw2D(logoX, logoY, Size.X, Size.Y, alpha);
+        _loadingTextTexture.Draw2D(textX, textY, Size.X, Size.Y, alpha);
     }
 
     protected override void OnResize(ResizeEventArgs e) {
@@ -257,6 +334,7 @@ _perfMonitor = new PerformanceMonitor();
     }
 
     protected override void OnUnload() {
+        DisposeGpuQueries();
         _textRenderer?.Dispose();
         
         _lightingPipeline?.Dispose();
@@ -288,6 +366,81 @@ _perfMonitor!.Dispose();
     }
 
     public float GetMouseWhellDelta() => mouseWhellDelta;
+
+    public void RegisterDraw(int indexCount)
+    {
+        _frameTriangles += indexCount / 3;
+        _frameDrawCalls++;
+    }
+
+    // Kept for Mesh lifetime notifications; loaded totals are not a render statistic.
+    public void RegisterMeshLoaded(int indexCount) { }
+
+    public void RegisterMeshUnloaded(int indexCount) { }
+
+    private void InitializeGpuQueries()
+    {
+        string version = GL.GetString(StringName.Version) ?? string.Empty;
+        bool core33 = Version.TryParse(version.Split(' ')[0], out Version? glVersion)
+            && glVersion >= new Version(3, 3);
+        string extensions = GL.GetString(StringName.Extensions) ?? string.Empty;
+
+        _gpuTimerQueriesSupported = core33 || extensions.Contains("GL_ARB_timer_query", StringComparison.Ordinal);
+        _gpuPrimitiveQueriesSupported = core33 || extensions.Contains("GL_ARB_transform_feedback2", StringComparison.Ordinal);
+
+        if (_gpuTimerQueriesSupported)
+            GL.GenQueries(GpuQueryCount, _gpuTimeQueries);
+        if (_gpuPrimitiveQueriesSupported)
+            GL.GenQueries(GpuQueryCount, _gpuPrimitiveQueries);
+    }
+
+    private void BeginGpuQueries()
+    {
+        int queryIndex = _gpuQueryFrame % GpuQueryCount;
+        if (_gpuTimerQueriesSupported)
+            GL.BeginQuery(QueryTarget.TimeElapsed, _gpuTimeQueries[queryIndex]);
+        if (_gpuPrimitiveQueriesSupported)
+            GL.BeginQuery(QueryTarget.PrimitivesGenerated, _gpuPrimitiveQueries[queryIndex]);
+    }
+
+    private void EndGpuQueries()
+    {
+        if (_gpuPrimitiveQueriesSupported)
+            GL.EndQuery(QueryTarget.PrimitivesGenerated);
+        if (_gpuTimerQueriesSupported)
+            GL.EndQuery(QueryTarget.TimeElapsed);
+        _gpuQueryFrame++;
+    }
+
+    private void ReadGpuQueryResults()
+    {
+        if (_gpuQueryFrame < GpuQueryCount) return;
+        int queryIndex = (_gpuQueryFrame - GpuQueryCount) % GpuQueryCount;
+
+        if (_gpuTimerQueriesSupported && IsQueryReady(_gpuTimeQueries[queryIndex])) {
+            GL.GetQueryObject(_gpuTimeQueries[queryIndex], GetQueryObjectParam.QueryResult, out long nanoseconds);
+            _gpuTimeMilliseconds = nanoseconds / 1_000_000.0;
+        }
+
+        if (_gpuPrimitiveQueriesSupported && IsQueryReady(_gpuPrimitiveQueries[queryIndex])) {
+            GL.GetQueryObject(_gpuPrimitiveQueries[queryIndex], GetQueryObjectParam.QueryResult, out long primitives);
+            _gpuPrimitives = primitives;
+        }
+    }
+
+    private static bool IsQueryReady(int query)
+    {
+        GL.GetQueryObject(query, GetQueryObjectParam.QueryResultAvailable, out int available);
+        return available != 0;
+    }
+
+    private void DisposeGpuQueries()
+    {
+        if (_gpuTimerQueriesSupported)
+            GL.DeleteQueries(GpuQueryCount, _gpuTimeQueries);
+        if (_gpuPrimitiveQueriesSupported)
+            GL.DeleteQueries(GpuQueryCount, _gpuPrimitiveQueries);
+    }
 }
 
 public static class TypeExtensions {

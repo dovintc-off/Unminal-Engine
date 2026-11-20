@@ -75,6 +75,10 @@ public class Texture2D : IDisposable {
 
 
     public void Draw2D(float pixelX, float pixelY, float screenWidth, float screenHeight) {
+        Draw2D(pixelX, pixelY, screenWidth, screenHeight, 1f);
+    }
+
+    public void Draw2D(float pixelX, float pixelY, float screenWidth, float screenHeight, float alpha) {
         if (!_isUiInitialized) {
             InitializeUiRenderer();
         }
@@ -100,6 +104,9 @@ public class Texture2D : IDisposable {
         GL.BindTexture(TextureTarget.Texture2D, Handle);
         int locTex = GL.GetUniformLocation(_uiShaderHandle, "u_Texture");
         if (locTex != -1) GL.Uniform1(locTex, 0);
+
+        int locAlpha = GL.GetUniformLocation(_uiShaderHandle, "u_Alpha");
+        if (locAlpha != -1) GL.Uniform1(locAlpha, Math.Clamp(alpha, 0f, 1f));
 
         GL.BindVertexArray(_dummyVao);
         GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);

@@ -4,9 +4,10 @@
 // render/Mesh.cs
 namespace Unminal.Render.MeshProgram;
 
+using Main;
+
 [SupportedOSPlatform("windows")]
-public class Mesh : IDisposable
-{
+public class Mesh : IDisposable {
     private int _vao, _vbo, _ebo, _indexCount;
 
     public Mesh(float[] vertices, uint[] indices, int[] attributes) {
@@ -48,22 +49,38 @@ public class Mesh : IDisposable
         }
 
         GL.BindVertexArray(0);
+
+        if (Engine.CurrentWindow is Main main) main.RegisterMeshLoaded(_indexCount);
     }
 
-    public Mesh(float[] vertices, uint[] indices) 
-        : this(vertices, indices, new int[] { 3, 3 }) {}
+    public Mesh(float[] vertices, uint[] indices) : this(vertices, indices, new int[] { 3, 3 }) {}
 
-    public void Draw()
-    {
+    public void Draw() {
         GL.BindVertexArray(_vao);
-        GL.DrawElements(PrimitiveType.Triangles, _indexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
+
+        if (Engine.CurrentWindow is Main main)
+            main.RegisterDraw(_indexCount);
+
+        GL.DrawElements(
+            PrimitiveType.Triangles,
+            _indexCount,
+            DrawElementsType.UnsignedInt,
+            IntPtr.Zero
+        );
+
         GL.BindVertexArray(0);
     }
 
-    public void Dispose()
-    {
+    public void Dispose() {
+        if (_vao == 0) return;
+        if (Engine.CurrentWindow is Main main) main.RegisterMeshUnloaded(_indexCount);
+
         GL.DeleteVertexArray(_vao);
         GL.DeleteBuffer(_vbo);
         GL.DeleteBuffer(_ebo);
+
+        _vao = 0;
+        _vbo = 0;
+        _ebo = 0;
     }
 }
