@@ -3,10 +3,8 @@ namespace Dov1ntc.MyGameIn3d;
 using static Dov1ntc.MyGameIn3d.Scene;
 using Unminal.Core.Scripting.Script;
 using Unminal.Core.Scripting.Utils;
-using Unminal.Core.Commands.Structure;
 using Unminal.Core.State;
 using Unminal.Core.PlayerCamera;
-using Unminal.Core.Commands.Manager;
 using Unminal.Render.Light;
 using Unminal.Render.Objects;
 using Unminal.Render.SkyBox;
@@ -14,6 +12,7 @@ using Unminal.Render.Billboards;
 using Unminal.UI.TextRender.TextRenderer;
 using Unminal.UI.EventBus;
 using Unminal.Utils.Colors;
+using Unminal.Core.Command;
 
 [SupportedOSPlatform("windows")]
 [Script]
@@ -45,11 +44,14 @@ public class Game : Script {
         _textRenderer = new Text("Assets/fonts/PFAgoraSlabPro-Bold.ttf", 256);
 
         skybox = new Skybox(Engine.Paths.BaseSkyBoxAssets);
+    }
 
-        CommandManager.AddCommand("debug", new Command(){Name = "SayHello", Layer = null!, ExecuteMethod = "SayHello", ExecutedLayer = true});
-        CommandManager.AddCommand("debug", new Command(){Name = "Server", Layer = null!, ExecutedLayer = false});
-        CommandManager.AddCommand("Server", new Command(){Name = "Open", Layer = null!, ExecuteMethod = "ServerOpen", ExecutedLayer = true});
-        CommandManager.AddCommand("Server", new Command(){Name = "Conect", Layer = null!, ExecuteMethod = "ServerConect", ExecutedLayer = true});
+    [IsCommand("mycmd")]
+    public void MyOwnedCommand(string[] args){
+        if (args.Length >= 1) {
+            Console.Write(args[0]);
+        }
+        // or some code here
     }
 
     public void OnBtnPress(ButtonPressedEvent e) =>

@@ -4,13 +4,11 @@
 namespace Unminal;
 
 using Unminal.Core.Scripting.Utils;
-using Unminal.Core.Commands.Manager;
 
 [SupportedOSPlatform("windows")]
 class Program {
     static void Main(string[] args) {
         Engine.LoadEngineStates(args);
-        CommandManager.LoadCommands();
         ScriptingUtils.LoadScriptingSystem(args);
         Engine.Paths.BaseFolder = AppContext.BaseDirectory;
     }

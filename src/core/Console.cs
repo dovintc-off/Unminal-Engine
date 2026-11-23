@@ -3,7 +3,7 @@
 // See LICENSE file for details.
 namespace Unminal.Core.EngineConsole;
 
-using Unminal.Core.Commands.Executor;
+using Unminal.Core.Command;
 using Unminal.Render.Primitive._2D;
 using Unminal.UI.TextRender.TextRenderer;
 using Unminal.Utils.Colors;
@@ -63,7 +63,12 @@ public class Console {
 
         if (input.IsKeyReleased(Keys.Enter)) {
             if (string.IsNullOrWhiteSpace(InputedCommand)) return;
-            CommandExecutor.Execute(InputedCommand);
+
+            // IS HERE 
+
+            CommandManager.Execute(InputedCommand);
+
+
             WriteHistory(InputedCommand);
             InputedCommand = "";
             return;
