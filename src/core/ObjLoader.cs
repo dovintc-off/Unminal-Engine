@@ -22,8 +22,12 @@ public static class ObjLoader {
         var finalVertices = new List<float>();
         var indices = new List<uint>();
         var vertexCache = new Dictionary<(int posIdx, int normIdx), uint>();
-
-        string[] lines = File.ReadAllLines(path);
+        List<string> lines = new List<string>();
+        try {
+            lines = File.ReadAllLines(path).ToList();
+        } catch {
+            Log.Create(Log.LogType.ERROR, $"Cant load object from file: {path}");
+        }
 
         foreach (string line in lines) {
             if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))

@@ -37,7 +37,6 @@ public static class CommandManager {
         if (!_commands.TryGetValue(name, out var current)) return false;
         // Удаляем только ту команду, которую зарегистрировал этот владелец.
         if (current != owner) return false;
-        _commands.Remove(name);
         NameOfCommands.Remove(name);
         return _commands.Remove(name);
     }

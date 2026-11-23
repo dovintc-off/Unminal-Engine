@@ -23,13 +23,9 @@ public class GameObject : IDisposable {
         Shader = shader;
     }
 
-    public GameObject(string objFilePath) 
-        : this(LoadMeshFromObj(objFilePath), GetOrCreateDefaultShader()) 
-    {
-    }
+    public GameObject(string objFilePath) : this(LoadMeshFromObj(objFilePath), GetOrCreateDefaultShader()) {}
 
-    private static Mesh LoadMeshFromObj(string path)
-    {
+    private static Mesh LoadMeshFromObj(string path) {
         var modelData = ObjLoader.Load(path);
         return new Mesh(modelData.Vertices, modelData.Indices);
     }

@@ -26,10 +26,10 @@ public static class LuaAPI {
         lua.NewTable("unminal.command");
 
         // api's
-        lua["log"] = new Action<string>(msg => 
+        lua["unminal.log"] = new Action<string>(msg => 
             Log.Create(Log.LogType.INFO, $"[Lua] {msg}"));
 
-        lua["get_path"] = new Func<string, string>(path => GetPath.GetLuaPath(path));
+        lua["unminal.get_path"] = new Func<string, string>(path => GetPath.GetLuaPath(path, true));
 
         lua["unminal.command.register"] =
             new Action<string, LuaFunction>((name, callback) => {

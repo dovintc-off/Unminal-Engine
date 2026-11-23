@@ -33,19 +33,33 @@ public static class GetPath {
     }
 
     public static string GetLuaPath(string virtualPath, bool Logging = false, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) {
-        if (string.IsNullOrWhiteSpace(virtualPath))
-            throw new ArgumentException("Path cannot be null or empty.", nameof(virtualPath));
-        ValidateNoTraversal(virtualPath);
+        string FolderFrom = Path.GetFullPath(Directory.GetCurrentDirectory());
 
-        string baseDir = Path.GetFullPath(Path.Combine(Engine.Paths.BaseFolder, ".."));
-        string fullpath = Path.Combine(baseDir, virtualPath);
+        if (string.IsNullOrWhiteSpace(virtualPath)) {
+            Log.Create(Log.LogType.ERROR, "Virtual LUA path is null or white space");
+            return "";
+        }
 
-        if (Logging) Log.Create(Log.LogType.INFO, $"Load file: {fullpath}", file:file, line:line);
-        return fullpath;
+        string path = Path.GetFullPath(Path.Combine(FolderFrom, virtualPath));
+
+        string relative = Path.GetRelativePath(FolderFrom, path);
+
+        if (relative == ".." || relative.StartsWith(".." + Path.DirectorySeparatorChar,StringComparison.Ordinal) || Path.IsPathRooted(relative)) {
+            Log.Create(Log.LogType.WARNING, "Going outside the allowed folder");
+            return "";
+        }
+
+        if (File.Exists(path)) {
+            if (Logging) Log.Create(Log.LogType.INFO, $"Load file: {path}", file:file, line:line);
+            return path;   
+        } else {
+            Log.Create(Log.LogType.ERROR, $"{path} is not exists.");
+            return "";
+        }
     }
 
     private static void ValidateNoTraversal(string path) {
         if (path.Contains("..", StringComparison.Ordinal))
-            throw new Exception($"Path traversal ('..') is not allowed. Got: '{path}'");
+            Log.Create(Log.LogType.ERROR, $"Path traversal ('..') is not allowed. Got: '{path}'");
     }
 }
