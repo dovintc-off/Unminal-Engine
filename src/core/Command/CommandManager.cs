@@ -21,6 +21,27 @@ public static class CommandManager {
         }
     }
 
+    // In C# use [IsCommand(...)] this mrthod for Lua Unminal API
+    public static bool Register(string name, Action<string[]> action) {
+        if (string.IsNullOrWhiteSpace(name) || action == null) return false;
+        name = name.Trim().ToLowerInvariant();
+        if (_commands.ContainsKey(name)) return false;
+        _commands.Add(name, action);
+        NameOfCommands.Add(name);
+        return true;
+    }
+
+    public static bool Unregister(string name, Action<string[]> owner) {
+        if (string.IsNullOrWhiteSpace(name)) return false;
+        name = name.Trim().ToLowerInvariant();
+        if (!_commands.TryGetValue(name, out var current)) return false;
+        // Удаляем только ту команду, которую зарегистрировал этот владелец.
+        if (current != owner) return false;
+        _commands.Remove(name);
+        NameOfCommands.Remove(name);
+        return _commands.Remove(name);
+    }
+
     public static void LoadMethods() {
         Assembly assembly = Assembly.GetExecutingAssembly();
         foreach (Type type in assembly.GetTypes()) {

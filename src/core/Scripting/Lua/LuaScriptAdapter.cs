@@ -12,7 +12,7 @@ using Unminal.Core.Scripting.Script;
 public class LuaScriptAdapter : Script {
     private readonly string _scriptPath;
     private Lua? _lua;
-
+    private LuaCommandRegistry? _commandRegistry;
     private LuaFunction? _fnLoad;
     private LuaFunction? _fnUpdate;
     private LuaFunction? _fnDraw;
@@ -29,7 +29,8 @@ public class LuaScriptAdapter : Script {
             _lua = new Lua();
             _lua.State.Encoding = System.Text.Encoding.UTF8;
 
-            ActiveCamera = LuaAPI.RegisterApi(_lua, ActiveCamera!);
+            _commandRegistry = new LuaCommandRegistry();
+            ActiveCamera = LuaAPI.RegisterApi(_lua, ActiveCamera!, _commandRegistry);
 
             Log.Create(Log.LogType.INFO, $"[Lua] Loading: {_scriptPath}");
             _lua.DoFile(_scriptPath);
@@ -41,7 +42,19 @@ public class LuaScriptAdapter : Script {
 
             _fnLoad?.Call();
         } catch (Exception ex) {
-            Log.Create(Log.LogType.ERROR, $"[Lua] FATAL LOAD ERROR: {ex.Message}\n{ex.StackTrace}");
+            Log.Create(Log.LogType.ERROR,
+                $"[Lua] FATAL LOAD ERROR: {ex.Message}\n{ex.StackTrace}");
+
+            _commandRegistry?.Dispose();
+            _commandRegistry = null;
+
+            _lua?.Dispose();
+            _lua = null;
+
+            _fnLoad = null;
+            _fnDraw = null;
+            _fnUpdate = null;
+            _fnUnload = null;
         }
     }
 
@@ -68,11 +81,24 @@ public class LuaScriptAdapter : Script {
     }
 
     public override void Unload() {
-        if (_lua != null) {
-            try { _fnUnload?.Call(); } catch {}
-            _lua.Dispose();
+        try {
+            _fnUnload?.Call();
+        } catch (Exception ex) {
+            Log.Create(Log.LogType.ERROR,
+                $"[Lua] Unload Error: {ex.Message}");
+        } finally {
+            _commandRegistry?.Dispose();
+            _commandRegistry = null;
+
+            _fnLoad = null;
+            _fnUpdate = null;
+            _fnDraw = null;
+            _fnUnload = null;
+
+            _lua?.Dispose();
             _lua = null;
         }
+
         base.Unload();
     }
 }

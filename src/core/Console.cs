@@ -63,12 +63,7 @@ public class Console {
 
         if (input.IsKeyReleased(Keys.Enter)) {
             if (string.IsNullOrWhiteSpace(InputedCommand)) return;
-
-            // IS HERE 
-
             CommandManager.Execute(InputedCommand);
-
-
             WriteHistory(InputedCommand);
             InputedCommand = "";
             return;

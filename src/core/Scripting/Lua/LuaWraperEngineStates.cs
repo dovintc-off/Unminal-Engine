@@ -2,7 +2,6 @@
 // Licensed under GNU AGPLv3 with No-Misattribution Addendum
 // See LICENSE file for details.
 namespace Unminal.Core.Scripting.Lua.WraperStates;
-using OpenTK.Windowing.GraphicsLibraryFramework;
 
 [SupportedOSPlatform("windows")]
 public class WraperEngineStates {

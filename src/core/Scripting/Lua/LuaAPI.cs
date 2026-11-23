@@ -14,7 +14,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 [SupportedOSPlatform("Windows")]
 public static class LuaAPI {
-    public static Camera RegisterApi(Lua lua, Camera camera) {
+    public static Camera RegisterApi(Lua lua, Camera camera, LuaCommandRegistry commandRegistry) {
         // Lua Tables 
         lua.NewTable("unminal");
         lua.NewTable("unminal.ui");
@@ -23,12 +23,21 @@ public static class LuaAPI {
         lua.NewTable("key");
         lua.NewTable("mouse");
         lua.NewTable("mouse.visual");
+        lua.NewTable("unminal.command");
 
         // api's
         lua["log"] = new Action<string>(msg => 
             Log.Create(Log.LogType.INFO, $"[Lua] {msg}"));
 
         lua["get_path"] = new Func<string, string>(path => GetPath.GetLuaPath(path));
+
+        lua["unminal.command.register"] =
+            new Action<string, LuaFunction>((name, callback) => {
+                if (!commandRegistry.Register(name, callback)) {
+                    Log.Create(Log.LogType.WARNING,
+                        $"[Lua] Failed to register command '{name}'.");
+                }
+            });
 
         lua["unminal.create_object"] = new Func<string, GameObject?>((path) => {
             try { return new GameObject(path); } 

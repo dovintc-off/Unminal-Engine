@@ -1,6 +1,6 @@
 # All changes in project Unminal
 
-## [0.2.4-prerelease-2] - 2026.07.31
+## [0.2.4-prerelease-2] - from 2026.07.31
 ### **Added**
 - **2D Primitives:** *Square* (Rectangle), *Circle*, and *Triangle* (26.07)
 - **Billboard Class:** A rectangle that *always faces the player's camera* (26.07)
@@ -10,6 +10,8 @@
 - **Logging System:** Added `Console.CreateLog` for unified output to both `System` and `Engine` consoles (28.07)
 - **Fonts:** Added *Arial* and *Arial Bold* fonts with *corresponding engine path variables* (30.07)
 - **Command Registration:** Added `AddCommand` method to *register custom Command objects* under a specific command name (30.07)
+- **New Command System:** use `[IsCommand(...)]` attribute only for methods. (23.11)
+- **New `Unminal Lua API v1.1 (2)`:** we can creating commands. (23.11)
 
 ### **Changed**
 - **Shader Organization:** All shaders are now *located in a single folder* (`Assets/shaders/`) (26.07)
@@ -24,6 +26,10 @@
 - **Command Initialization:** Commands are now `initialized once in Program.cs`. Previously, the command structure was created on the first input, causing a freeze/stutter (30.07)
 - **Duplicate Logs:** Fixed an issue where duplicate log messages were displayed in the console (30.07)
 - **Text Performance:** Multi-colored text is now rendered in a single Draw Call (30.07)
+- **Сlearing LUA Data:** in case of unexpected errors, the *data is cleared automatically*. (23.11)
+
+### **Removed**
+- **Old command system** (from file) (23.11)
 
 ### **For Devs**
 - **Build Process:** The *Assets folder is now automatically copied to the build* output directory during compilation (27.07)
