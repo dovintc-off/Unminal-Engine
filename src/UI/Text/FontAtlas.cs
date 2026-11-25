@@ -13,6 +13,7 @@ public class Atlas : IDisposable
     public int TextureID {get; private set;}
     public int Width {get; private set;}
     public int Height {get; private set;}
+    private static int CountAtlases = 1;    
     private ConcurrentDictionary<char, GlyphData> _glyphs = new ConcurrentDictionary<char, GlyphData>();
 
     private const string Charset = Engine.LanguageChars.EN + Engine.LanguageChars.RU + """0123456789 .,!?-_+*/|\=()[]{}<>:;"'@#$%^""";
@@ -81,7 +82,8 @@ public class Atlas : IDisposable
             if (hPixels > maxHeightInRow) maxHeightInRow = hPixels;
         }
 
-        string outputPath = "debug/generated_atlas.png";
+        string outputPath = $"debug/generated_atlas_{CountAtlases}.png";
+        CountAtlases=CountAtlases+1;
         string? dirName = Path.GetDirectoryName(outputPath);
         if (!string.IsNullOrEmpty(dirName))
         {
