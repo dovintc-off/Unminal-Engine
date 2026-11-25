@@ -8,6 +8,7 @@ using Unminal.Core.PlayerCamera;
 [SupportedOSPlatform("windows")]
 public abstract class Script {
     public Camera? ActiveCamera { get; set; }
+    
     public virtual void Load(Matrix4 initialProjection)  {
         if (ActiveCamera == null) ActiveCamera = new Camera(new Vector3(0, 5, 10), -90.0f, 0.0f);
     }

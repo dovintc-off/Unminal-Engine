@@ -9,6 +9,7 @@ using Unminal.Core.PlayerCamera;
 using Unminal.Render.Light;
 using Unminal.Utils.ConfigManager;
 using Unminal.Core.Input.Mouse.VisualState;
+using Microsoft.VisualBasic.FileIO;
 
 [SupportedOSPlatform("windows")]
 public static class Engine {
@@ -136,9 +137,40 @@ public static class Engine {
         Engine.Paths.BaseFolder = AppDomain.CurrentDomain.BaseDirectory;
         Engine.args = args;
         Engine.ConfigManager = new();
+        
+        for (int cArgs=0;cArgs<args.Length;cArgs++) {
+            string arg = args[cArgs];
+            try {
+                if (arg == "--lua") {
+                    if (File.Exists(Path.Combine(Paths.BaseFolder, arg))) {
+                        Console.WriteLine(arg);
+                        cArgs++;
+                    } else {
+                        Log.Create(Log.LogType.ERROR, "Lua script is not found");
+                    }
+                    
+                } else if (arg == "-telemetry") {
+                    Log.Create(Log.LogType.WARNING, "This function may not work well. Don't rely solely on this data.");
+                } else if (arg == "help" || arg == "--help" || arg == "-help" || arg == "info" || arg == "-info" || arg == "--info") {
+                    DrawInfoText();
+                }
+            } catch (Exception e) {
+                Log.Create(Log.LogType.ERROR, $"Some exception in loading lua:\n{e}");
+            }
+        }
+    }
+
+    private static void DrawInfoText() {
+        Console.WriteLine("\n\n[#white]This is [#cyan]Unminal Engine");
+        Console.WriteLine("[#white]Author: [#pink]Dov1ntc [#white]& Xwared Studio");
+        Console.WriteLine("[#white]See more about Unminal: https://github.com/dovintc-off/Unminal-Engine");
+        Console.WriteLine("[#white]Version: [#yellow]0.2.4-prerelease-2");
+        Console.WriteLine("[#white]Usage commands:");
+        Console.WriteLine("   [#cyan]--lua <path> (run engine with Lua script)");
+        Console.WriteLine("   [#cyan]-telemetry (run engine with telemetry)");
+        Console.WriteLine("   [#cyan]-help/--help/help/-info/--info/info (show this text again)\n\n");
     }
 }
-// yeah im soooo love word "maybe" 
 
 public class GameTimer{
     private readonly Stopwatch _stopwatch = Stopwatch.StartNew();

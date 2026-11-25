@@ -45,4 +45,8 @@ public class ScriptingUtils {
         using var engine = new Main.Main(script);
         engine.Run();
     }
+
+    public void Some() {
+    
+    }
 }
