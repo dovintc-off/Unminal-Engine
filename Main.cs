@@ -43,11 +43,9 @@ public class Main : GameWindow {
     private bool _gpuPrimitiveQueriesSupported;
     private double _gpuTimeMilliseconds = double.NaN;
     private long _gpuPrimitives = -1;
-#if DEBUG
-private PerformanceMonitor? _perfMonitor;
-#endif
+    private PerformanceMonitor? _perfMonitor;
     public Main(Script userGame) : base(
-            new GameWindowSettings() { UpdateFrequency = 100000 }, 
+            new GameWindowSettings() { UpdateFrequency = 60 }, 
             new NativeWindowSettings(){ 
                 Location =  new Vector2i(Engine.ConfigManager.GetConfig<int>("LocationX"), Engine.ConfigManager.GetConfig<int>("LocationY")),
                 ClientSize = new Vector2i(Engine.ConfigManager.GetConfig<int>("Width"), Engine.ConfigManager.GetConfig<int>("Height")),
@@ -92,8 +90,8 @@ private PerformanceMonitor? _perfMonitor;
         );
 
         Billboard.Initialize(
-            GetPath.GetCorrectPath("Assets/shaders/billboard.vert", true), 
-            GetPath.GetCorrectPath("Assets/shaders/billboard.frag", true)
+            GetPath.GetCorrectPath(Engine.Paths.Shaders.billboardV, true), 
+            GetPath.GetCorrectPath(Engine.Paths.Shaders.billboardF, true)
         );
         
         _model = Matrix4.Identity;
@@ -109,9 +107,9 @@ private PerformanceMonitor? _perfMonitor;
             _lightingPipeline = new ForwardUBOPipeline(_lightManager);
         }
 
-#if DEBUG
-_perfMonitor = new PerformanceMonitor();
-#endif
+        if (Engine.Telemetry) {
+            _perfMonitor = new PerformanceMonitor();
+        }
 
         _lightingPipeline.Initialize();
 
@@ -297,10 +295,8 @@ _perfMonitor = new PerformanceMonitor();
 
             _debugTexts["draw-calls"] =
                 $"Draw Calls: {_drawCallsPerSecond}/sec | GPU Time: {gpuTime}";
-#if DEBUG
-            if (_perfMonitor != null)
+            if (_perfMonitor != null && Engine.Telemetry) 
                 _debugTexts["pc-Resources"] = $"{_perfMonitor.GetMemory()} | {_perfMonitor.GetCPU()} | {_perfMonitor.GetGPU()}";
-#endif
             _textRenderer.DrawString(_debugTexts["name"], 10, 5, TS, new Vector4(Colors.White, 1f), 2f);
             _textRenderer.DrawString(_debugTexts["fps"], 10, 30, TS, new Vector4(Colors.White, 1f), 1f); 
             _textRenderer.DrawString(_debugTexts["pos&fov"], 10, 55, TS, new Vector4(Colors.White, 1f), 1f);
@@ -349,9 +345,9 @@ _perfMonitor = new PerformanceMonitor();
         Engine.ConfigManager?.SetConfig(newDebug: $"{Engine.IsDebug}");
         Engine.ConfigManager?.SetConfig(newWidth: $"{Engine.WindowSize.X}");
         Engine.ConfigManager?.SetConfig(newHeight: $"{Engine.WindowSize.Y}");
-#if DEBUG
-_perfMonitor!.Dispose();
-#endif
+        if (Engine.Telemetry) {
+            _perfMonitor!.Dispose();
+        }
     }
 
     protected override void OnMouseWheel(MouseWheelEventArgs e) {
@@ -443,11 +439,77 @@ _perfMonitor!.Dispose();
     }
 }
 
-public static class TypeExtensions {
-    public static object? GetDefaultValue(this Type type) {
-        if (type == typeof(string)) return string.Empty;
-        if (type.IsValueType) return Activator.CreateInstance(type);
-        if (type == typeof(bool)) return false;
-        return null;
+[SupportedOSPlatform("windows")]
+public static class CLI {
+    private static string[]? args;
+    private static bool IsLoaded = false;
+    public static void Load(string[] _args) {
+        if (!IsLoaded) {IsLoaded = true;}
+        else {
+            Log.Create(Log.LogType.ERROR, "Cant load args more than 1 time");
+            return;
+        }
+        args = _args;
+    
+        ParseArgs();
+
+    }
+
+    private static void ParseArgs() {
+        if (args != null && args.Length > 0)
+        for (int cArgs = 0;cArgs<args.Length;cArgs++) {
+            switch (args[cArgs]) {
+                case "--debug":
+                case "-debug":
+                case "debug":
+                    Log.Create(Log.LogType.INFO, "You enable debug mode (dev mode)");
+                    Engine.DebugMode = true;
+                    break;
+                case "--telemetry":
+                case "-telemetry":
+                case "telemetry":
+                    Log.Create(Log.LogType.INFO, "You enable telemetry");
+                    Log.Create(Log.LogType.WARNING, "This function may not work well. Don't rely solely on this data.");
+                    Engine.Telemetry = true;
+                    break;
+                case "help":
+                case "info":
+                    DrawInfoText();
+                    Log.Create(Log.LogType.ERROR, "You wanna exit? [Y/n]\n");
+                    string? input_help = System.Console.ReadLine();
+                    if (string.IsNullOrWhiteSpace(input_help)) {StopExecution("incorrect value entered");}
+                    if (input_help!.ToLower() == "y") {
+                        StopExecution("");
+                    } else if (input_help.ToLower() != "n") {StopExecution($"incorrect value entered {input_help}");}
+                    break;
+                default:
+                    Log.Create(Log.LogType.ERROR, "Command not found,\nyou wanna exit? [Y/n]\n");
+                    string? input_def = System.Console.ReadLine();
+                    if (string.IsNullOrWhiteSpace(input_def)) {StopExecution("incorrect value entered");}
+                    if (input_def!.ToLower() == "y") {
+                        DrawInfoText();
+                        StopExecution("");
+                    } else if (input_def.ToLower() != "n") {StopExecution($"incorrect value entered {input_def}");}
+                    break;
+            }
+        }
+    }
+    // This metod was stop runing of engine
+    private static void StopExecution(string Exception) {
+        if (!string.IsNullOrWhiteSpace(Exception)) {
+            Log.Create(Log.LogType.ERROR, Exception);
+        }
+        Environment.Exit(0);
+    }
+
+    private static void DrawInfoText() {
+        Console.WriteLine("\n\n[#white]This is [#cyan]Unminal Engine");
+        Console.WriteLine("[#white]Author: [#pink]Dov1ntc [#white]& Xwared Studio");
+        Console.WriteLine("[#white]See more about Unminal: https://github.com/dovintc-off/Unminal-Engine");
+        Console.WriteLine("[#white]Version: [#yellow]0.2.4-prerelease-2");
+        Console.WriteLine("[#white]Usage commands:");
+        Console.WriteLine("   [#cyan]-telemetry (run engine with telemetry)");
+        Console.WriteLine("   [#cyan]-debug (run engine with developer mode)");
+        Console.WriteLine("   [#cyan]help/info (show this text again)\n\n");
     }
 }
