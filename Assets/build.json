@@ -1,0 +1,34 @@
+{
+    "fonts": [
+        "ARIAL.arial_bolditalicmt.ttf",
+        "ARIAL.arialmt.ttf",
+        "Metroplex-Shadow.ttf",
+        "PFAgoraSlabPro-Bold.ttf",
+        "VCR-OSD-MONO.ttf"
+    ],
+    "shaders": [
+        "base.frag",
+        "base.vert",
+        "billdoard.frag",
+        "billboard.vert",
+        "main.frag",
+        "main.vert",
+        "skybox.frag",
+        "skybox.vert",
+        "text.frag",
+        "text.vert",
+        "ui2d.frag",
+        "ui2d.vert"        
+    ],
+    "textures": [
+        "cat.png",
+        "EngineLogo.png",
+        "loading.png",
+        "SB_back.png",
+        "SB_bottom.png",
+        "SB_fromt.png",
+        "SB_left.png",
+        "SB_right.png",
+        "SB_top.png"
+    ]
+}

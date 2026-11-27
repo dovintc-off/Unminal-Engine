@@ -11,6 +11,8 @@ using Unminal.Render.Light;
 using Unminal.Render.Billboards;
 using Unminal.UI.TextRender.TextRenderer;
 using Unminal.Utils.Colors;
+using System.Reflection;
+using System.Text.Json;
 
 [SupportedOSPlatform("windows")]
 public class Main : GameWindow {
@@ -61,6 +63,7 @@ public class Main : GameWindow {
 
     protected override void OnLoad() {
         base.OnLoad(); 
+        ResourceManager.Load();
         gameConsole = new Console();
         Engine.CurrentWindow = this;
 
@@ -511,5 +514,110 @@ public static class CLI {
         Console.WriteLine("   [#cyan]-telemetry (run engine with telemetry)");
         Console.WriteLine("   [#cyan]-debug (run engine with developer mode)");
         Console.WriteLine("   [#cyan]help/info (show this text again)\n\n");
+    }
+}
+
+[SupportedOSPlatform("Windows")]
+public static class ResourceManager {
+    private static BuildConfig? _config;
+    private static Assembly? _assembly;
+    private static string? _projectName;
+    private static bool _isLoaded = false;
+    public static void Load() {
+        if (_isLoaded) {Log.Create(Log.LogType.ERROR, "Cant run more than 1 time"); return;}
+        _assembly = Assembly.GetExecutingAssembly();
+        _projectName = _assembly.GetName().Name!;
+        ReadBuild();
+        _isLoaded = true;
+    }
+
+    private static void ReadBuild() {
+        string resourceName = $"{_projectName}.Assets.build.json";
+        IsInitedAssembly();
+        using Stream? stream =  _assembly!.GetManifestResourceStream(resourceName);
+        // Проверяет что файл сборки не пуст
+        if (stream == null) throw new Exception($"Build file is not found");
+        using StreamReader reader = new StreamReader(stream!);
+        string buildInfo = reader.ReadToEnd();
+        _config = JsonSerializer.Deserialize<BuildConfig>(buildInfo)!;
+    } 
+
+    // Чтение из раздела шрифтов
+    public static Stream? GetFont(string _path) {
+        Stream? streamer = null;
+        IsInitedConfig();
+        foreach (string path in _config!.fonts!) {
+            streamer = Get(path, _path, "fonts");
+            if (streamer != null) {
+                break;
+            }
+        }
+        return streamer;
+    }
+
+    // Чтение из раздела шейдеров
+    public static Stream? GetShader(string _path) {
+        Stream? streamer = null;
+        IsInitedConfig();
+        foreach (string path in _config!.shaders!) {
+            streamer = Get(path, _path, "shaders");
+            if (streamer != null) {
+                break;
+            }
+        }
+        return streamer;
+    }
+
+    // Чтение из раздела текстур
+    public static Stream? GetTexture(string _path) {
+        Stream? streamer = null;
+        IsInitedConfig();
+        foreach (string path in _config!.textures!) {
+            streamer = Get(path, _path, "textures");
+            if (streamer != null) {
+                break;
+            }
+        }
+        return streamer;
+    }
+    private static void IsInitedConfig() {
+        // Проверка на существование конфига
+        if (_config == null) {
+            Log.Create(Log.LogType.ERROR, "Build file is not readed");
+            throw new Exception("Build file is not readed");
+        }
+    }
+    private static void IsInitedAssembly() {
+        // Проверка на существование сборки
+        if (_assembly == null) {
+            Log.Create(Log.LogType.ERROR, "Assembly is not created");
+            throw new Exception("Assembly is not created");
+        }
+    }
+    private static Stream? Get(string path, string _path, string category) {
+        bool condition = path == _path;
+        // путь может придти в формате "path.file.txt" проверяем как file.txt так и полностью
+        int last = path.LastIndexOf('.');
+        if (!condition && last > 0) {
+            int second = path[..last].LastIndexOf('.');
+            // Проверка на нахождние второй точки (совмещено с приравниванием)
+            condition = second != -1 ? (path[second..] == _path) : false; 
+        }
+        
+        if (condition) {
+            // создает путь к ассету из данных
+            string fullName = $"{_projectName}.Assets.{category}.{_path}";
+            IsInitedAssembly();
+            // Создает объект класса Stream в случае не нахождения файла вернет null
+            // Обязательно используете using чтобы Stream закрылся сам
+            return _assembly!.GetManifestResourceStream(fullName);
+        }
+        return null;
+    }
+    // Для десереализации json файла с данными сборки ассетов
+    public class BuildConfig {
+        public string[]? fonts { get; set; }
+        public string[]? shaders { get; set; }
+        public string[]? textures { get; set; }
     }
 }

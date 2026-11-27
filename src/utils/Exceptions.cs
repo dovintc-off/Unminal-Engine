@@ -29,6 +29,13 @@ public class RenderCrash: Exception {
     public RenderCrash(string message, Exception exception): base(message, exception){}
 }
 
+public class BuildResourcesFileNotFound: Exception {
+    public BuildResourcesFileNotFound(): base(){}
+    public BuildResourcesFileNotFound(string message): base(message){}
+    public BuildResourcesFileNotFound(string message, Exception exception): base(message, exception){}
+}
+
+
 public class ScriptNotFound : Exception {
     public ScriptNotFound() : base() {}
     public ScriptNotFound(string message) : base(message) {}

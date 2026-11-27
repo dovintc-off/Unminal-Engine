@@ -67,20 +67,6 @@ public static class Engine {
     public static class Paths {
         // path to folder where located Unminal.exe file
         public static string BaseFolder {get; set;} = "";
-        public static string Assets = @"Assets\";
-        public static string Objects = @"Assets\objects\";
-        public static string Data = @"Assets\data\";
-        public static string Font = @"Assets\fonts\";
-        public static string Shader = @"Assets\shaders\";
-        public static string Textures = @"Assets\textures\";
-        public static readonly string[] BaseSkyBoxAssets = {
-            "./Assets/SkyBox/right.png",
-            "./Assets/SkyBox/left.png",
-            "./Assets/SkyBox/top.png",
-            "./Assets/SkyBox/bottom.png",
-            "./Assets/SkyBox/front.png",
-            "./Assets/SkyBox/back.png"
-        };
         public class Config {
             private static readonly Dictionary<string, string> _ = new() {
                 ["CommandConfig"] = "./Assets/data/CommandExecutorConfig.json", 

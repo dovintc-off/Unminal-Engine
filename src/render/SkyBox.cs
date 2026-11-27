@@ -45,8 +45,7 @@ public class Skybox : IDisposable
         LoadTexture(faces);
     }
 
-    private void LoadShaders()
-    {
+    private void LoadShaders() {
         string vertCode = File.ReadAllText(GetPath.GetCorrectPath(Engine.Paths.Shaders.skyboxV, true));
 
         string fragCode = File.ReadAllText(GetPath.GetCorrectPath(Engine.Paths.Shaders.skyboxF, true));
